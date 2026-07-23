@@ -1,0 +1,2126 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubelindo — Layanan Penukaran Mata Uang Premium</title>
+    
+    <!-- === META TAGS UNTUK PREVIEW SOSIAL MEDIA (WhatsApp, FB, Telegram, dll) === -->
+    <meta name="description" content="Layanan jembatan finansial terpercaya untuk penukaran mata uang Rupiah (IDR) dan Rubel Rusia (RUB). Proses instan, aman, dan transparan.">
+    
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://rubelindokonverter.firebaseapp.com/"> <!-- Ganti dengan domain asli jika ada -->
+    <meta property="og:title" content="Rubelindo — Layanan Penukaran Mata Uang IDR ⇌ RUB">
+    <meta property="og:description" content="Tukar Rupiah (IDR) ke Rubel Rusia (RUB) dengan kurs kompetitif, aman, dan instan. Pelayanan premium beroperasi 07:00 - 23:00 WIB.">
+    <meta property="og:image" content="https://i.postimg.cc/1z1HHjg3/rubelindo2.png"> <!-- Ganti URL ini dengan link logo bulat baru yang sudah Anda upload -->
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://rubelindokonverter.firebaseapp.com/">
+    <meta name="twitter:title" content="Rubelindo — Layanan Penukaran Mata Uang IDR ⇌ RUB">
+    <meta name="twitter:description" content="Tukar Rupiah (IDR) ke Rubel Rusia (RUB) dengan kurs kompetitif, aman, dan instan. Pelayanan premium beroperasi 07:00 - 23:00 WIB.">
+    <meta name="twitter:image" content="https://i.postimg.cc/1z1HHjg3/rubelindo2.png"> <!-- Ganti URL ini juga -->
+    <!-- ========================================================================= -->
+
+    <!-- === PWA & Konfigurasi Layar Utama === -->
+    <meta name="theme-color" content="#09090b">
+    <link rel="apple-touch-icon" href="https://i.postimg.cc/1z1HHjg3/rubelindo2.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="https://i.postimg.cc/1z1HHjg3/rubelindo2.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="https://i.postimg.cc/1z1HHjg3/rubelindo2.png">
+    <link rel="manifest" href="data:application/json;charset=utf-8,{%22name%22:%22Rubelindo Premium%22,%22short_name%22:%22Rubelindo%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%2309090b%22,%22theme_color%22:%22%2309090b%22,%22description%22:%22Konverter%20Mata%20Uang%20Premium%22,%22icons%22:[{%22src%22:%22https%3A%2F%2Fi.postimg.cc%2FcHhgzL7j%2FRUBELINDOv1.png%22,%22sizes%22:%22192x192%22,%22type%22:%22image/png%22}]}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --brand-primary: #f97316;
+            --brand-secondary: #ea580c;
+            --bg-dark: #18181b; /* Warna background lebih terang (Zinc-900) */
+            --glass-bg: rgba(39, 39, 42, 0.6); /* Efek kaca lebih terang (Zinc-800) */
+            --glass-border: rgba(255, 255, 255, 0.12);
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            -webkit-tap-highlight-color: transparent;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.18) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(249, 115, 22, 0.12) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.12) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #f4f4f5;
+            overflow-x: hidden;
+        }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+            border-radius: 2.25rem;
+        }
+
+        .input-glass-group {
+            position: relative;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1.5rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .input-glass-group:focus-within {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+            transform: scale(1.02);
+        }
+
+        .primary-btn {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            box-shadow: 0 10px 25px -10px rgba(249, 115, 22, 0.6);
+            transition: all 0.3s ease;
+        }
+        .primary-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        .primary-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            filter: none;
+        }
+
+        .currency-pill {
+            background: rgba(249, 115, 22, 0.1);
+            border: 1px solid rgba(249, 115, 22, 0.3);
+            color: var(--brand-primary);
+            font-weight: 800;
+            padding: 0.3rem 0.8rem;
+            border-radius: 0.8rem;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .swap-circle {
+            background: #18181b;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        .swap-circle:hover { transform: rotate(180deg) scale(1.1); border-color: var(--brand-primary); color: var(--brand-primary); }
+
+        .status-badge { padding: 4px 14px; border-radius: 100px; font-size: 0.7rem; font-weight: 800; text-transform: uppercase; }
+        .quick-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #a1a1aa;
+            padding: 0.4rem 0.8rem;
+            border-radius: 1rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .quick-chip:hover {
+            background: rgba(249, 115, 22, 0.15);
+            border-color: rgba(249, 115, 22, 0.4);
+            color: #f97316;
+            transform: translateY(-2px);
+        }
+        .badge-online { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); color: #4ade80; }
+        .badge-offline { background: rgba(113, 113, 122, 0.1); border: 1px solid rgba(113, 113, 122, 0.2); color: #a1a1aa; }
+
+        @keyframes pulse-soft { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(0.98); } }
+        .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+
+        .chat-bubble.sender { background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); }
+        .chat-bubble.receiver { background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.04); }
+
+        .shimmer-text {
+            background: linear-gradient(90deg, #71717a 0%, #ffffff 50%, #71717a 100%);
+            background-size: 200% auto;
+            color: transparent; -webkit-background-clip: text; background-clip: text;
+            animation: shimmerText 4s linear infinite;
+        }
+        @keyframes shimmerText { to { background-position: 200% center; } }
+
+        .stagger-up { opacity: 0; transform: translateY(20px); animation: staggerUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        @keyframes staggerUp { to { opacity: 1; transform: translateY(0); } }
+
+        .faq-q { color: #f4f4f5; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem; margin-top: 1.5rem; }
+        .faq-a { color: #a1a1aa; margin-top: 0.5rem; line-height: 1.6; }
+
+        /* Gaya Khusus Bintang Rating Interaktif */
+        .rating-stars svg { transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .rating-stars svg:hover { transform: scale(1.25); color: #fbbf24; }
+    </style>
+</head>
+<body class="antialiased selection:bg-orange-500/30">
+
+    <div class="container mx-auto p-4 max-w-7xl min-h-screen flex flex-col items-center py-10 lg:py-12 space-y-6">
+        
+        <div id="user-view-wrapper" class="w-full max-w-xl mx-auto space-y-6">
+             <div id="broadcast-banner" class="hidden w-full bg-orange-600 text-white p-3 text-center text-[10px] font-black uppercase tracking-widest fixed top-0 left-0 z-[100] shadow-lg animate-pulse"></div>
+            <!-- Header section -->
+            <header class="text-center stagger-up" style="animation-delay: 0.1s;">
+                <div class="relative inline-block mb-4">
+                    <div class="absolute inset-0 bg-orange-500 blur-3xl opacity-20 rounded-full"></div>
+                    <img src="https://i.postimg.cc/1z1HHjg3/rubelindo2.png" alt="Rubelindo" class="relative h-28 w-auto drop-shadow-2xl">
+                   </div>
+                <h1 class="text-4xl font-extrabold tracking-tight text-white mb-2">Rubelindo</h1>
+                <!-- Seksi Tentang Kami & Deskripsi Jasa -->
+                <div class="max-w-xs mx-auto mb-6 stagger-up" style="animation-delay: 0.15s;">
+                    <p class="text-[10px] font-black text-orange-500 uppercase tracking-[0.3em] mb-2">Tentang Kami</p>
+                    <p class="text-[11px] text-zinc-400 leading-relaxed font-medium px-4">
+                        Rubelindo adalah jembatan finansial terpercaya yang menghubungkan Rupiah (IDR) dan Rubel (RUB) secara instan. Kami menyediakan layanan penukaran mata uang dengan protokol keamanan tinggi, kurs kompetitif, dan transparansi penuh untuk mendukung kebutuhan transaksi Anda.
+                    </p>
+                </div>
+                <div class="flex items-center justify-center gap-3">
+                    <div id="rating-display" class="flex items-center text-[10px] font-bold text-zinc-400 bg-zinc-900/50 px-4 py-1.5 rounded-full border border-white/5 shadow-sm"></div>
+                    <div id="admin-status-indicator"></div>
+                </div>
+            </header>
+
+            <!-- Main Converter Card -->
+            <div id="converter-card" class="glass-card p-6 md:p-10 stagger-up relative overflow-hidden" style="animation-delay: 0.2s;">
+                <div id="main-content-wrapper">
+                    <div class="mb-10 flex flex-col items-center">
+                        <div id="rate-info" class="shimmer-text text-base font-bold mb-2"></div>
+                        <p class="text-[10px] text-zinc-500 uppercase tracking-[0.4em] font-black">Exchange Protocol v2.6</p>
+                    </div>
+
+                    <div id="pre-offline-timer-container" class="hidden bg-red-500/10 border border-red-500/20 rounded-3xl p-5 mb-8 text-center animate-pulse">
+                        <p class="text-[10px] uppercase tracking-widest text-red-400 font-bold mb-1">Layanan akan ditutup Dalam waktu :</p>
+                        <p id="pre-offline-timer" class="font-mono text-2xl font-black text-red-500"></p>
+                    </div>
+
+                    <div class="bg-zinc-950/40 border border-white/5 rounded-3xl p-6 mb-10 text-center shadow-inner">
+                        <p class="text-[10px] text-zinc-500 uppercase tracking-[0.3em] font-bold mb-2">Sisa Limit Transaksi Minggu ini :</p>
+                        <p id="limit-display" class="text-2xl font-extrabold text-white tracking-tight">Menghitung...</p>
+                    </div>
+                    
+                    <div id="error-message" class="bg-red-500/10 border border-red-500/20 text-red-400 p-5 rounded-2xl text-center mb-8 text-xs font-bold hidden"></div>
+
+                    <!-- Input Fields -->
+                    <div class="space-y-6">
+                        <div class="input-glass-group p-6">
+                            <label for="from-amount" class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Anda Membayar</label>
+                            <div class="flex items-center">
+                                <input type="text" inputmode="numeric" id="from-amount" placeholder="0" class="w-full text-4xl font-extrabold bg-transparent text-white focus:outline-none placeholder-zinc-800 tracking-tighter">
+                                <div id="from-currency-label" class="currency-pill ml-3">IDR</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tombol Nominal Cepat -->
+                        <div id="quick-amount-chips" class="flex flex-wrap gap-2 px-6 mt-2 mb-4">
+                            <!-- Tombol akan diisi oleh JavaScript berdasarkan mata uang aktif -->
+                        </div>
+
+                        <div class="flex justify-center -my-6 relative z-10">
+                            <button id="swap-button" class="swap-circle p-5 rounded-[1.5rem] text-zinc-400">
+                                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M7 16V4m0 0L3 8m4-4l4 4m9 4v12m0 0l4-4m-4 4l-4-4" /></svg>
+                            </button>
+                        </div>
+
+                        <div class="input-glass-group p-6">
+                            <label class="block text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-3">Anda Menerima</label>
+                            <div class="flex items-center">
+                                <div id="to-amount" class="w-full text-4xl font-extrabold text-white min-h-[48px] flex items-center tracking-tighter">0</div>
+                                <div id="to-currency-label" class="currency-pill ml-3">RUB</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div id="result-details" class="mt-10 space-y-4 hidden animated-element">
+                        <div class="bg-white/[0.02] p-6 rounded-3xl border border-white/5 space-y-4 shadow-sm">
+                            <div class="flex justify-between items-center text-xs"><span class="text-zinc-500 font-bold uppercase tracking-tighter">Jumlah Kotor</span><span id="detail-from" class="font-bold text-white"></span></div>
+                            <div class="flex justify-between items-center text-xs"><span class="text-zinc-500 font-bold uppercase tracking-tighter">Hasil Bersih</span><span id="detail-to" class="font-black text-green-400 text-lg"></span></div>
+                            <div class="h-px bg-white/5"></div>
+                            <div class="flex justify-between items-center text-xs"><span class="text-zinc-500 font-bold uppercase tracking-tighter" id="detail-fee-label">Biaya Layanan</span><span id="detail-fee" class="font-bold text-red-400/80"></span></div>
+                            <div class="flex justify-between items-center text-xs"><span class="text-zinc-500 font-bold uppercase tracking-tighter">Kurs Terkunci</span><span id="detail-rate" class="font-bold text-zinc-300"></span></div>
+                        </div>
+                    </div>
+
+                    <!-- Recipient Info -->
+                    <div id="user-details-form" class="mt-8 space-y-5 hidden animated-element">
+                        <div class="space-y-4">
+                            <div class="input-glass-group p-5">
+                                <label for="user-name" class="block text-[10px] font-black text-zinc-500 uppercase mb-2">Nama Lengkap Penerima</label>
+                                <input type="text" id="user-name" placeholder="Sesuai rekening bank" class="w-full bg-transparent text-white focus:outline-none text-sm font-semibold">
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="input-glass-group p-5">
+                                    <label for="user-bank" class="block text-[10px] font-black text-zinc-500 uppercase mb-2">Nama Bank / Institusi</label>
+                                    <select id="user-bank" class="w-full bg-transparent text-white focus:outline-none text-sm font-semibold appearance-none cursor-pointer"></select>
+                                </div>
+                                <div class="input-glass-group p-5">
+                                    <label for="user-account" id="user-account-label" class="block text-[10px] font-black text-zinc-500 uppercase mb-2">Nomor Rekening / Kartu</label>
+                                    <input type="number" id="user-account" placeholder="Hanya angka" class="w-full bg-transparent text-white focus:outline-none text-sm font-semibold">
+                                </div>
+                            </div>
+                            
+                            <!-- Aturan 161-FZ & Checkbox Persetujuan -->
+                            <div class="mt-6 bg-red-500/5 border border-red-500/20 rounded-2xl p-5 shadow-sm">
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 text-red-500">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-[10px] font-black text-red-400 uppercase tracking-widest mb-1.5">Regulasi Anti-Pencucian Uang (161-FZ)</h4>
+                                        <p class="text-[10px] text-zinc-400 leading-relaxed mb-3">
+                                            Berdasarkan <strong>Hukum Federal Rusia 161-FZ</strong>, Bank Sentral melarang keras transfer dana dari pihak ketiga. 
+                                            <span class="text-white font-bold">Nama pengirim uang harus sama persis dengan nama penerima yang didaftarkan.</span> Pelanggaran akan mengakibatkan dana ditahan secara sepihak.
+                                        </p>
+                                        <label class="flex items-center gap-2 cursor-pointer group">
+                                            <input type="checkbox" id="fz161-agree" class="w-4 h-4 rounded border-white/10 bg-zinc-900 text-orange-500 focus:ring-orange-500 focus:ring-offset-zinc-900">
+                                            <span class="text-[10px] font-bold text-zinc-300 group-hover:text-white transition">Saya paham dan menjamin nama pengirim dana sesuai.</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Submission -->
+                    <div id="action-container" class="mt-10">
+                        <button id="lock-button" class="hidden w-full primary-btn text-white font-black py-5 px-6 rounded-[1.5rem] flex items-center justify-center gap-4 uppercase tracking-[0.2em] text-[11px]" disabled>
+                            <span id="lock-button-text">Kunci Harga & Buat Pesanan</span>
+                            <div id="lock-loader" class="loader hidden"></div>
+                        </button>
+                    </div>
+                    <div id="success-message" class="hidden mt-6 bg-green-500/10 border border-green-500/20 text-green-400 text-[10px] font-black p-5 rounded-2xl text-center uppercase tracking-[0.2em]"></div>
+                </div>
+
+                <!-- Offline Overlay -->
+                <div id="offline-overlay" class="hidden absolute inset-0 bg-zinc-950/98 flex flex-col justify-center items-center text-center p-12 z-[60] rounded-[2.25rem]">
+                    <div class="w-20 h-20 bg-zinc-900 rounded-[2rem] flex items-center justify-center mb-8 border border-white/5 animate-pulse-soft">
+                        <svg class="w-10 h-10 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <h2 class="text-2xl font-black text-white mb-3">Layanan Sedang Istirahat</h2>
+                    <p class="text-zinc-500 text-xs mb-10 max-w-[240px] mx-auto leading-relaxed uppercase tracking-widest font-bold">Jam Operasional: 07:00 — 23:00 WIB</p>
+                    <p id="offline-timer" class="text-orange-500 text-4xl font-black tracking-tighter italic"></p>
+                </div>
+            </div>
+
+            <!-- Bagian Informasi Depan -->
+            <div class="w-full space-y-4 stagger-up" style="animation-delay: 0.3s;">
+                
+                <div class="bg-orange-500/10 border border-orange-500/20 rounded-3xl p-6 shadow-sm">
+                    <h3 class="text-xs font-black text-orange-500 uppercase tracking-[0.2em] mb-3">Penting Mengenai Limit Transaksi</h3>
+                    <p class="text-[11px] text-zinc-400 leading-relaxed font-medium">
+                        Demi mematuhi regulasi perbankan internasional saat ini dan untuk menjamin keamanan setiap transaksi, kami menetapkan batas akumulasi transaksi mingguan. Langkah ini kami ambil untuk memastikan semua transfer dana berjalan lancar dan aman bagi semua pihak. Terima kasih atas pengertian Anda.
+                    </p>
+                </div>
+
+                <div id="how-to-use-section" class="glass-card rounded-[1.75rem] border border-white/5 overflow-hidden">
+                    <button id="how-to-use-toggle" class="w-full p-6 flex justify-between items-center text-left hover:bg-white/[0.02] transition">
+                        <span class="text-xs font-bold text-zinc-300 uppercase tracking-widest">Petunjuk Penggunaan Aplikasi</span>
+                        <svg id="how-to-use-icon" class="w-3 h-3 text-zinc-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="how-to-use-content" class="max-h-0 overflow-hidden transition-all duration-500 bg-zinc-950/20">
+                        <div class="p-8 text-zinc-500 text-[11px] space-y-6 leading-relaxed">
+                            <p class="font-bold text-zinc-300">Selamat datang di Rubelindo! Berikut adalah langkah-langkah mudah untuk melakukan transaksi:</p>
+                            <div class="space-y-5">
+                                <div class="flex gap-4"><span class="w-6 h-6 shrink-0 rounded-lg bg-zinc-900 flex items-center justify-center text-[10px] font-black text-orange-500">1</span><div><strong class="text-zinc-200">Masukkan Jumlah:</strong> Ketik jumlah uang yang ingin Anda tukar. Gunakan tombol panah di tengah untuk menukar arah konversi (IDR ke RUB atau sebaliknya).</div></div>
+                                <div class="flex gap-4"><span class="w-6 h-6 shrink-0 rounded-lg bg-zinc-900 flex items-center justify-center text-[10px] font-black text-orange-500">2</span><div><strong class="text-zinc-200">Lengkapi Data Penerima:</strong> Isi nama lengkap (sesuai rekening), pilih nama bank, dan masukkan nomor rekening tujuan dengan teliti. Pastikan Anda membaca aturan 161-FZ.</div></div>
+                                <div class="flex gap-4"><span class="w-6 h-6 shrink-0 rounded-lg bg-zinc-900 flex items-center justify-center text-[10px] font-black text-orange-500">3</span><div><strong class="text-zinc-200">Kunci Harga:</strong> Klik tombol "Kunci Harga & Buat Pesanan" dan konfirmasi pesanan Anda di popup yang muncul.</div></div>
+                                <div class="flex gap-4"><span class="w-6 h-6 shrink-0 rounded-lg bg-zinc-900 flex items-center justify-center text-[10px] font-black text-orange-500">4</span><div><strong class="text-zinc-200">Lakukan Pembayaran:</strong> Anda memiliki waktu <strong class="text-orange-400">15 menit</strong> untuk mentransfer dana. Pastikan jumlahnya tepat.</div></div>
+                                <div class="flex gap-4"><span class="w-6 h-6 shrink-0 rounded-lg bg-zinc-900 flex items-center justify-center text-[10px] font-black text-orange-500">5</span><div><strong class="text-zinc-200">Konfirmasi Pembayaran:</strong> <strong class="text-orange-400">Sangat Penting!</strong> Kembali ke halaman ini dan tekan tombol <strong class="text-zinc-200">"Saya Sudah Bayar"</strong> agar pesanan diproses.</div></div>
+                                <div class="flex gap-4"><span class="w-6 h-6 shrink-0 rounded-lg bg-zinc-900 flex items-center justify-center text-[10px] font-black text-orange-500">6</span><div><strong class="text-zinc-200">Tunggu Proses:</strong> Admin akan memverifikasi pembayaran. Pantau status dan hubungi admin via <strong class="text-zinc-200">Live Chat</strong> jika perlu.</div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="faq-section" class="glass-card rounded-[1.75rem] border border-white/5 overflow-hidden">
+                    <button id="faq-toggle" class="w-full p-6 flex justify-between items-center text-left hover:bg-white/[0.02] transition">
+                        <span class="text-xs font-bold text-zinc-300 uppercase tracking-widest">Seputar Layanan (FAQ)</span>
+                        <svg id="faq-icon" class="w-3 h-3 text-zinc-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="faq-content" class="max-h-0 overflow-hidden transition-all duration-500 bg-zinc-950/20">
+                        <div class="p-8 text-zinc-500 text-[11px] space-y-6">
+                            
+                            <div><h4 class="text-[10px] font-black uppercase text-orange-500 mb-2">Seputar Layanan</h4>
+                                <p class="faq-q">T: Apa itu Rubelindo?</p>
+                                <p class="faq-a">J: Rubelindo adalah layanan jasa penukaran mata uang antara Rupiah Indonesia (IDR) dan Rubel Rusia (RUB) yang dirancang untuk menjadi cepat, aman, dan transparan dengan kurs real-time.</p>
+                                <p class="faq-q">T: Kapan jam operasional layanan ini?</p>
+                                <p class="faq-a">J: Layanan kami beroperasi setiap hari dari pukul <strong>07:00 hingga 23:00 WIB (GMT+7)</strong>. Anda hanya dapat membuat pesanan baru selama jam operasional tersebut.</p>
+                            </div>
+
+                            <div><h4 class="text-[10px] font-black uppercase text-orange-500 mb-2 mt-10">Proses Transaksi</h4>
+                                <p class="faq-q">T: Bagaimana cara menggunakan layanan ini?</p>
+                                <p class="faq-a">J: Prosesnya sangat mudah: Input jumlah, periksa rincian, isi data rekening, konfirmasi regulasi 161-FZ, kunci harga, lakukan transfer dalam 15 menit, lalu tekan tombol "Saya Sudah Bayar".</p>
+                                <p class="faq-q">T: Berapa lama waktu untuk pembayaran?</p>
+                                <p class="faq-a">J: Anda diberi waktu <strong>15 menit</strong> untuk transfer dan konfirmasi. Melebihi batas ini, pesanan akan dibatalkan otomatis.</p>
+                                <p class="faq-q">T: Berapa lama proses verifikasi?</p>
+                                <p class="faq-a">J: Admin biasanya memproses dalam waktu tidak lebih dari <strong>10 menit</strong> setelah Anda konfirmasi pembayaran.</p>
+                            </div>
+
+                            <div><h4 class="text-[10px] font-black uppercase text-orange-500 mb-2 mt-10">Biaya, Kurs, dan Limit</h4>
+                                <p class="faq-q">T: Apakah kurs yang ditampilkan final?</p>
+                                <p class="faq-a">J: Ya, saat Anda menekan "Kunci Harga", kurs tersebut akan dikunci untuk Anda selama jendela waktu pembayaran.</p>
+                                <p class="faq-q">T: Berapa biaya layanan yang dikenakan?</p>
+                                <p class="faq-a">J: Biaya bervariasi tergantung jumlah transaksi dan ditampilkan <strong>100% transparan</strong> di bagian rincian sebelum Anda memesan.</p>
+                                <p class="faq-q">T: Kapan limit mingguan direset?</p>
+                                <p class="faq-a">J: Limit reset secara otomatis <strong>setiap hari Senin</strong>.</p>
+                            </div>
+
+                            <div><h4 class="text-[10px] font-black uppercase text-orange-500 mb-2 mt-10">Keamanan</h4>
+                                <p class="faq-q">T: Seberapa aman transaksi di sini?</p>
+                                <p class="faq-a">J: Keamanan prioritas kami. Fitur Live Chat, status transparan, dan ulasan pengguna memastikan pemantauan yang baik.</p>
+                                <p class="faq-q">T: Salah transfer, apa yang harus dilakukan?</p>
+                                <p class="faq-a">J: <strong>Segera hubungi admin</strong> melalui Live Chat di halaman transaksi aktif Anda untuk bantuan langsung.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW: Syarat & Ketentuan -->
+                <div id="tnc-section" class="glass-card rounded-[1.75rem] border border-white/5 overflow-hidden">
+                    <button id="tnc-toggle" class="w-full p-6 flex justify-between items-center text-left hover:bg-white/[0.02] transition">
+                        <span class="text-xs font-bold text-zinc-300 uppercase tracking-widest">Syarat & Ketentuan</span>
+                        <svg id="tnc-icon" class="w-3 h-3 text-zinc-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="tnc-content" class="max-h-0 overflow-hidden transition-all duration-500 bg-zinc-950/20">
+                        <div class="p-8 text-zinc-500 text-[11px] space-y-6">
+                            <div><h4 class="text-[10px] font-black uppercase text-orange-500 mb-2">1. Ketentuan Umum</h4>
+                                <p class="faq-a">Dengan menggunakan layanan Rubelindo, Anda setuju untuk tunduk pada syarat dan ketentuan ini. Layanan hanya boleh digunakan untuk tujuan legal dan mematuhi hukum yang berlaku di Indonesia maupun Federasi Rusia.</p>
+                            </div>
+                            <div><h4 class="text-[10px] font-black uppercase text-orange-500 mb-2 mt-10">2. Kewajiban Pengguna</h4>
+                                <p class="faq-a">Sesuai dengan regulasi perbankan dan Hukum Federal 161-FZ, nama pengirim dana harus <strong>SAMA PERSIS</strong> dengan nama penerima. Kegagalan mematuhi ini dapat mengakibatkan dana ditahan dan transaksi dibatalkan.</p>
+                            </div>
+                            <div><h4 class="text-[10px] font-black uppercase text-orange-500 mb-2 mt-10">3. Proses Pembayaran</h4>
+                                <p class="faq-a">Pengguna diwajibkan melakukan pembayaran dalam batas waktu <strong>15 menit</strong>. Jika melewati batas waktu, pesanan akan dibatalkan secara otomatis oleh sistem, dan Anda harus membuat pesanan baru dengan kurs yang berlaku saat itu.</p>
+                            </div>
+                            <div><h4 class="text-[10px] font-black uppercase text-orange-500 mb-2 mt-10">4. Pembatalan & Pengembalian Dana (Refund)</h4>
+                                <p class="faq-a">Transaksi yang sudah berstatus <strong>"Selesai"</strong> tidak dapat dibatalkan atau ditarik kembali. Jika terjadi kesalahan transfer oleh pengguna, proses refund akan dikenakan biaya administrasi sesuai kebijakan bank dan waktu peninjauan manual hingga 3x24 jam.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NEW: Kebijakan Privasi -->
+                <div id="privacy-section" class="glass-card rounded-[1.75rem] border border-white/5 overflow-hidden">
+                    <button id="privacy-toggle" class="w-full p-6 flex justify-between items-center text-left hover:bg-white/[0.02] transition">
+                        <span class="text-xs font-bold text-zinc-300 uppercase tracking-widest">Kebijakan Privasi</span>
+                        <svg id="privacy-icon" class="w-3 h-3 text-zinc-500 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="privacy-content" class="max-h-0 overflow-hidden transition-all duration-500 bg-zinc-950/20">
+                        <div class="p-8 text-zinc-500 text-[11px] space-y-6">
+                            <div><h4 class="text-[10px] font-black uppercase text-orange-500 mb-2">Pengumpulan Data</h4>
+                                <p class="faq-a">Kami hanya mengumpulkan informasi yang sangat diperlukan untuk memproses transaksi Anda secara aman, seperti nama lengkap (sesuai rekening bank), nama bank tujuan, dan nomor rekening/kartu. Kami tidak mengumpulkan data pribadi yang tidak relevan.</p>
+                            </div>
+                            <div><h4 class="text-[10px] font-black uppercase text-orange-500 mb-2 mt-10">Penggunaan Data</h4>
+                                <p class="faq-a">Data Anda secara eksklusif digunakan untuk keperluan validasi identitas dan penyelesaian transfer dana sesuai dengan aturan anti-pencucian uang internasional. Rubelindo <strong>TIDAK AKAN</strong> pernah menjual, menyewakan, atau mendistribusikan data pengguna ke pihak ketiga mana pun.</p>
+                            </div>
+                            <div><h4 class="text-[10px] font-black uppercase text-orange-500 mb-2 mt-10">Keamanan Data</h4>
+                                <p class="faq-a">Kami menggunakan standar keamanan tingkat lanjut untuk mengenkripsi data di sisi server. Riwayat transaksi hanya dapat diakses melalui sistem yang aman pada perangkat pengguna yang valid atau oleh administrator sistem untuk proses verifikasi.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-[9px] text-center text-zinc-600 font-bold uppercase tracking-[0.4em] px-10 py-6">RubelIndo-2026</p>
+            </div>
+        </div>
+
+        <!-- Panel Riwayat / Transaksi Aktif -->
+        <div id="user-history-panel" class="hidden w-full stagger-up">
+            <div class="glass-card p-8 border border-white/5 shadow-2xl">
+                <h2 class="text-sm font-black text-white text-center mb-10 uppercase tracking-[0.3em]">Transaksi Aktif</h2>
+                
+                <!-- KOTAK STATUS UI -->
+                <div id="user-history-log" class="space-y-6"></div>
+                
+                <!-- NEW: KOTAK CHAT TERPISAH (ANTI HILANG) -->
+                <div id="user-chat-container" class="hidden mt-12 border-t border-white/5 pt-10">
+                    <h3 class="text-center text-zinc-600 font-black text-[10px] uppercase tracking-[0.5em] mb-6">Live Chat Dukungan</h3>
+                    <div id="user-chat-messages" class="chat-messages max-h-[350px] overflow-y-auto mb-6 flex flex-col gap-4 custom-scroll"></div>
+                    <form id="user-chat-form" class="flex gap-3">
+                        <input type="text" id="user-chat-input" class="flex-grow bg-zinc-900 border border-white/5 rounded-2xl px-5 py-4 text-xs text-white focus:outline-none" placeholder="Tulis pesan...">
+                        <button type="submit" class="bg-zinc-800 text-zinc-300 p-4 rounded-2xl">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tampilan Selesai -->
+        <div id="completed-card" class="hidden glass-card p-10 text-center w-full stagger-up">
+            <div class="w-28 h-28 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-8 border border-green-500/20">
+                <svg class="w-14 h-14 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h2 class="text-3xl font-black text-white mb-3">Berhasil!</h2>
+            <p class="text-zinc-500 text-[11px] mb-12 uppercase tracking-widest">ID Transaksi: <span id="completed-tx-id" class="text-zinc-300 font-mono font-black"></span></p>
+            
+            <div id="rating-section" class="bg-zinc-950/50 p-8 rounded-[2rem] border border-white/5 mb-10 shadow-inner">
+                <p class="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mb-6">Berikan Ulasan Anda</p>
+                <div id="completed-rating-stars" class="flex justify-center gap-4 mb-4"></div>
+                <p id="rating-thanks" class="hidden text-green-400 text-[10px] font-black mt-4 uppercase tracking-widest">Terima kasih atas ulasan Anda</p>
+            </div>
+            
+            <button id="view-receipt-btn" class="w-full bg-zinc-900 text-white font-bold py-4 px-6 rounded-2xl border border-white/10 text-[10px] uppercase tracking-[0.2em] mb-4 hover:bg-zinc-800 transition">Lihat Struk Transaksi</button>
+            <button id="new-transaction-button" class="w-full primary-btn text-white font-black py-5 px-6 rounded-2xl text-[10px] uppercase tracking-[0.3em]">
+                Buat Transaksi Baru
+            </button>
+        </div>
+        
+        <!-- Dialog Konfirmasi -->
+        <div id="confirmation-modal" class="modal-backdrop hidden fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <div class="glass-card p-10 max-w-sm w-full border border-white/10 shadow-[0_0_120px_rgba(0,0,0,0.9)]">
+                <h3 class="text-lg font-black text-white mb-3 text-center uppercase tracking-widest">Konfirmasi Pesanan</h3>
+                <p class="text-zinc-500 text-[11px] text-center mb-8 leading-relaxed font-bold">Harap verifikasi jumlah pembayaran sebelum melanjutkan protokol:</p>
+                <div id="confirmation-amount" class="text-3xl font-black text-orange-500 text-center mb-10 p-8 bg-zinc-950/80 rounded-[1.5rem] border border-white/5 shadow-inner tracking-tighter"></div>
+                <div class="grid grid-cols-2 gap-4">
+                    <button id="cancel-order-btn" class="bg-zinc-800 text-zinc-500 font-bold py-4 rounded-xl hover:bg-zinc-700 transition text-[10px] uppercase tracking-widest">Kembali</button>
+                    <button id="confirm-order-btn" class="bg-orange-600 text-white font-black py-4 rounded-xl hover:bg-orange-500 transition text-[10px] uppercase tracking-widest">Lanjutkan</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Chat Admin -->
+        <div id="admin-chat-modal" class="modal-backdrop hidden fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <div class="glass-card w-full max-w-md border border-white/10 flex flex-col max-h-[85vh] overflow-hidden shadow-2xl">
+                <div class="p-8 border-b border-white/5 flex justify-between items-center bg-zinc-900/40">
+                    <div>
+                        <h3 class="text-[11px] font-black text-white uppercase tracking-[0.2em]">Live Chat Admin</h3>
+                        <p id="admin-chat-txid" class="text-[9px] text-zinc-500 font-mono mt-1"></p>
+                    </div>
+                    <button id="close-chat-modal-btn" class="w-10 h-10 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-400 hover:text-white transition">&times;</button>
+                </div>
+                <div id="admin-chat-messages" class="flex-grow overflow-y-auto p-8 space-y-6 chat-messages custom-scroll"></div>
+                <form id="admin-chat-form" class="p-6 bg-zinc-950/90 flex gap-3">
+                    <input type="text" id="admin-chat-input" class="flex-grow bg-zinc-900 border border-white/5 rounded-2xl px-5 py-4 text-xs text-white focus:outline-none" placeholder="Tulis pesan untuk admin...">
+                    <button type="submit" class="primary-btn text-white p-4 rounded-2xl">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Kontrol Admin -->
+        <div id="admin-panel" class="hidden w-full stagger-up">
+            <div class="glass-card p-10 border border-white/5">
+                <div id="admin-header-container" class="flex justify-between items-center mb-10">
+                    <h2 class="text-xl font-black text-white uppercase tracking-[0.4em]">Panel Admin</h2>
+                    <button id="logout-btn" class="hidden text-[10px] bg-red-500/10 text-red-500 px-4 py-2 rounded-full uppercase font-bold hover:bg-red-500/20">Keluar</button>
+                </div>
+
+                <div id="pin-form" class="space-y-4">
+                    <p class="text-zinc-500 text-xs text-center mb-6">Silakan login dengan kredensial sistem Anda.</p>
+                    <input type="email" id="admin-email" class="w-full bg-zinc-950 border border-white/10 rounded-2xl p-5 text-white text-xs focus:outline-none focus:border-orange-500" placeholder="Email Admin">
+                    <input type="password" id="admin-password" class="w-full bg-zinc-950 border border-white/10 rounded-2xl p-5 text-white text-xs focus:outline-none focus:border-orange-500" placeholder="Password">
+                    <button id="login-submit" class="w-full primary-btn text-white font-bold py-5 mt-4 rounded-2xl uppercase text-[11px] tracking-[0.3em]">Autentikasi Server</button>
+                    <p id="login-error" class="text-red-500 text-center text-[10px] font-black hidden uppercase tracking-widest mt-4">Akses Ditolak</p>
+                </div>
+                
+                <!-- Wrapper Grid untuk Layar Besar -->
+                <div id="admin-grid-layout" class="w-full lg:grid-cols-12 lg:gap-10 lg:items-start" style="display: none;">
+                    
+                <div id="admin-dashboard" class="lg:col-span-7 space-y-10" style="display: none;">
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="bg-zinc-950/60 p-5 rounded-3xl border border-white/5">
+                            <p class="text-[9px] font-black text-zinc-600 uppercase mb-2 tracking-widest">Fee RUB → IDR</p>
+                            <p id="income-idr" class="text-sm font-black text-orange-500"></p>
+                        </div>
+                        <div class="bg-zinc-950/60 p-5 rounded-3xl border border-white/5">
+                            <p class="text-[9px] font-black text-zinc-600 uppercase mb-2 tracking-widest">Fee IDR → RUB</p>
+                            <p id="income-rub" class="text-sm font-black text-orange-500"></p>
+                        </div>
+                        <div class="bg-zinc-950/60 p-5 rounded-3xl border border-white/5 shadow-lg border-orange-500/10">
+                            <p class="text-[9px] font-black text-zinc-600 uppercase mb-2 tracking-widest">Total Estimasi</p>
+                            <p id="total-income" class="text-sm font-black text-green-500 font-mono"></p>
+                        </div>
+                    </div>
+                    <div class="bg-zinc-950/50 p-6 rounded-3xl border border-white/5 overflow-hidden">
+                        <canvas id="income-chart"></canvas>
+                    </div>
+                    <div class="space-y-6">
+                        
+                        <!-- Manajemen Stok -->
+                        <div class="bg-zinc-950/80 p-8 rounded-[2rem] border border-white/5">
+                            <p class="text-[10px] font-black text-zinc-500 uppercase text-center mb-6 tracking-[0.4em]">Inventori Stok</p>
+
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-zinc-900/50 p-4 rounded-2xl border border-white/5">
+                                    <p class="text-[8px] font-black text-zinc-500 uppercase text-center mb-2 tracking-widest">Stok IDR</p>
+                                    <p id="stock-idr-display" class="text-sm font-black text-white text-center tracking-tighter">0</p>
+                                </div>
+                                <div class="bg-zinc-900/50 p-4 rounded-2xl border border-white/5">
+                                    <p class="text-[8px] font-black text-zinc-500 uppercase text-center mb-2 tracking-widest">Stok RUB</p>
+                                    <p id="stock-rub-display" class="text-sm font-black text-white text-center tracking-tighter">0</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-3 mb-6">
+                                <div class="flex gap-2">
+                                    <input type="number" id="add-stock-idr-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white text-xs text-center" placeholder="Isi Saldo IDR (Top-Up)">
+                                    <button id="add-stock-idr-btn" class="bg-blue-600/10 text-blue-400 font-black px-4 rounded-xl border border-blue-600/20 text-[9px] uppercase hover:bg-blue-600/20 transition-all whitespace-nowrap">Tambah</button>
+                                </div>
+                                <div class="flex gap-2">
+                                    <input type="number" id="add-stock-rub-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white text-xs text-center" placeholder="Isi Saldo RUB (Top-Up)">
+                                    <button id="add-stock-rub-btn" class="bg-blue-600/10 text-blue-400 font-black px-4 rounded-xl border border-blue-600/20 text-[9px] uppercase hover:bg-blue-600/20 transition-all whitespace-nowrap">Tambah</button>
+                                </div>
+                            </div>
+
+                            <div class="pt-6 border-t border-white/5">
+                                <p class="text-[9px] font-black text-zinc-500 uppercase text-center mb-4 tracking-[0.2em]">Batas Alert Stok Menipis</p>
+                                
+                                <div class="grid grid-cols-2 gap-3 mb-4">
+                                    <div class="text-center">
+                                        <p class="text-[8px] text-zinc-600 uppercase font-bold mb-1">Batas IDR</p>
+                                        <p id="alert-threshold-idr-display" class="text-[10px] font-black text-orange-500 tracking-tighter">Loading...</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-[8px] text-zinc-600 uppercase font-bold mb-1">Batas RUB</p>
+                                        <p id="alert-threshold-rub-display" class="text-[10px] font-black text-orange-500 tracking-tighter">Loading...</p>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <div class="flex gap-2">
+                                        <input type="number" id="alert-threshold-idr-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2 text-white text-xs text-center" placeholder="Set Peringatan IDR">
+                                        <button id="update-threshold-idr-btn" class="bg-zinc-800 text-zinc-400 font-black px-3 rounded-xl text-[9px] uppercase hover:text-white transition-all">Set</button>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <input type="number" id="alert-threshold-rub-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-2 text-white text-xs text-center" placeholder="Set Peringatan RUB">
+                                        <button id="update-threshold-rub-btn" class="bg-zinc-800 text-zinc-400 font-black px-3 rounded-xl text-[9px] uppercase hover:text-white transition-all">Set</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manajemen Limit Transaksi -->
+                        <div class="bg-zinc-950/80 p-8 rounded-[2rem] border border-white/5 mb-6">
+                            <p class="text-[10px] font-black text-zinc-500 uppercase text-center mb-6 tracking-[0.4em]">MANAJEMEN LIMIT MINGGUAN</p>
+                            <p id="current-limit-display" class="text-2xl font-black text-white text-center mb-2 tracking-tighter">Loading...</p>
+                            <p id="last-limit-update" class="text-[9px] text-zinc-500 text-center mb-8 uppercase tracking-widest">Terakhir diubah: -</p>
+                            <input type="number" id="update-limit-input" class="w-full bg-zinc-900 border border-white/10 rounded-2xl p-4 text-white mb-4 text-center text-xs" placeholder="Input Limit Baru (Contoh: 3000000)">
+                            <button id="update-limit-btn" class="w-full bg-purple-600/10 text-purple-400 font-black py-4 rounded-xl border border-purple-600/20 text-[10px] uppercase tracking-widest hover:bg-purple-600/20 transition-all">Update Limit (1x Seminggu)</button>
+                        </div>
+                        
+                        <!-- Manajemen KURS MANUAL -->
+                         <div class="bg-zinc-950/80 p-8 rounded-[2rem] border border-white/5">
+                            <p class="text-[10px] font-black text-zinc-500 uppercase text-center mb-6 tracking-[0.4em]">MANAJEMEN KURS (IDR/RUB)</p>
+                            <p id="current-rate-display" class="text-2xl font-black text-white text-center mb-8 tracking-tighter">Loading...</p>
+                            <input type="number" id="manual-rate-input" class="w-full bg-zinc-900 border border-white/10 rounded-2xl p-4 text-white mb-4 text-center text-xs" placeholder="Input Kurs Baru (Contoh: 175)">
+                            <button id="update-rate-button" class="w-full bg-orange-600/10 text-orange-400 font-black py-4 rounded-xl border border-orange-600/20 text-[10px] uppercase">UPDATE KURS UNTUK USER</button>
+                        </div>
+                        
+                        <!-- Manajemen Rekening Tujuan -->
+                        <div class="bg-zinc-950/80 p-8 rounded-[2rem] border border-white/5">
+                            <p class="text-[10px] font-black text-zinc-500 uppercase text-center mb-6 tracking-[0.4em]">PENGATURAN REKENING PEMBAYARAN</p>
+                            
+                            <div class="space-y-4">
+                                <div class="p-4 bg-zinc-900/50 rounded-2xl border border-white/5">
+                                    <p class="text-[9px] font-black text-orange-500 uppercase mb-3 tracking-widest">Rekening IDR (Untuk User Bayar)</p>
+                                    <input type="text" id="payout-name-idr" class="w-full bg-zinc-950 border border-white/10 rounded-xl p-3 text-white text-[10px] mb-2" placeholder="Nama Pemilik">
+                                    <input type="text" id="payout-bank-idr" class="w-full bg-zinc-950 border border-white/10 rounded-xl p-3 text-white text-[10px] mb-2" placeholder="Nama Bank">
+                                    <input type="text" id="payout-acc-idr" class="w-full bg-zinc-950 border border-white/10 rounded-xl p-3 text-white text-[10px]" placeholder="Nomor Rekening">
+                                </div>
+
+                                <div class="p-4 bg-zinc-900/50 rounded-2xl border border-white/5">
+                                    <p class="text-[9px] font-black text-orange-500 uppercase mb-3 tracking-widest">Rekening RUB (Untuk User Bayar)</p>
+                                    <input type="text" id="payout-name-rub" class="w-full bg-zinc-950 border border-white/10 rounded-xl p-3 text-white text-[10px] mb-2" placeholder="Nama Pemilik (Cyrillic)">
+                                    <input type="text" id="payout-bank-rub" class="w-full bg-zinc-950 border border-white/10 rounded-xl p-3 text-white text-[10px] mb-2" placeholder="Nama Bank/SBP">
+                                    <input type="text" id="payout-acc-rub" class="w-full bg-zinc-950 border border-white/10 rounded-xl p-3 text-white text-[10px]" placeholder="Nomor Kartu/Telepon">
+                                </div>
+
+                                <button id="update-payout-btn" class="w-full bg-green-600/10 text-green-400 font-black py-4 rounded-xl border border-green-600/20 text-[10px] uppercase tracking-widest hover:bg-green-600/20 transition-all">Simpan Perubahan Rekening</button>
+                            </div>
+                        </div>
+                        
+
+                        <!-- Manajemen Biaya Layanan (Dynamic Fee) -->
+<div class="bg-zinc-950/80 p-8 rounded-[2rem] border border-white/5 mt-6">
+    <p class="text-[10px] font-black text-zinc-500 uppercase text-center mb-6 tracking-[0.4em]">MANAJEMEN BIAYA LAYANAN (%)</p>
+    
+    <div class="space-y-4">
+        <div class="grid grid-cols-1 gap-4">
+            <div class="p-4 bg-zinc-900/50 rounded-2xl border border-white/5">
+                <p class="text-[9px] font-black text-orange-500 uppercase mb-3 tracking-widest">Transaksi Kecil (< 1 Juta)</p>
+                <div class="flex items-center gap-3">
+                    <input type="number" id="fee-small" class="w-full bg-zinc-950 border border-white/10 rounded-xl p-3 text-white text-center text-xs" placeholder="Contoh: 12">
+                    <span class="text-zinc-500 font-bold">%</span>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-zinc-900/50 rounded-2xl border border-white/5">
+                <p class="text-[9px] font-black text-orange-500 uppercase mb-3 tracking-widest">Transaksi Menengah (1 - 4 Juta)</p>
+                <div class="flex items-center gap-3">
+                    <input type="number" id="fee-medium" class="w-full bg-zinc-950 border border-white/10 rounded-xl p-3 text-white text-center text-xs" placeholder="Contoh: 10">
+                    <span class="text-zinc-500 font-bold">%</span>
+                </div>
+            </div>
+
+            <div class="p-4 bg-zinc-900/50 rounded-2xl border border-white/5">
+                <p class="text-[9px] font-black text-orange-500 uppercase mb-3 tracking-widest">Transaksi Besar (> 4 Juta)</p>
+                <div class="flex items-center gap-3">
+                    <input type="number" id="fee-large" class="w-full bg-zinc-950 border border-white/10 rounded-xl p-3 text-white text-center text-xs" placeholder="Contoh: 8">
+                    <span class="text-zinc-500 font-bold">%</span>
+                </div>
+            </div>
+        </div>
+
+        <button id="update-fees-btn" class="w-full bg-orange-600/10 text-orange-400 font-black py-4 rounded-xl border border-orange-600/20 text-[10px] uppercase tracking-widest hover:bg-orange-600/20 transition-all">Update Persentase Biaya</button>
+    </div>
+</div>
+
+                        <div class="bg-zinc-950/80 p-8 rounded-[2rem] border border-white/5 mt-6">
+                             <p class="text-[10px] font-black text-zinc-500 uppercase text-center mb-6 tracking-[0.4em]">PENGUMUMAN GLOBAL (BANNER)</p>
+                             <textarea id="broadcast-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-4 text-white text-xs mb-4 focus:outline-none focus:border-orange-500" rows="3" placeholder="Tulis pengumuman di sini... (Kosongkan untuk menghapus banner)"></textarea>
+                             <button id="update-broadcast-btn" class="w-full bg-blue-600/10 text-blue-400 font-black py-4 rounded-xl border border-blue-600/20 text-[10px] uppercase tracking-widest hover:bg-blue-600/20 transition-all">Update Pengumuman</button>
+                        </div>
+
+                        <div class="bg-zinc-950/50 p-6 rounded-2xl border border-white/5 flex items-center justify-between">
+                            <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Status Offline Darurat</span>
+                            <button id="manual-offline-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 transition-colors bg-zinc-800">
+                                <span class="inline-block w-5 h-5 transform bg-white rounded-full transition-transform ml-1" id="manual-offline-switch"></span>
+                            </button>
+                        </div>
+
+                        <!-- Status Force Online -->
+                        <div class="bg-zinc-950/50 p-6 rounded-2xl border border-white/5 flex items-center justify-between">
+                            <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Mode Lembur (Paksa Buka)</span>
+                            <button id="force-online-toggle" class="relative inline-flex items-center h-7 rounded-full w-12 transition-colors bg-zinc-800">
+                                <span class="inline-block w-5 h-5 transform bg-white rounded-full transition-transform ml-1" id="force-online-switch"></span>
+                            </button>
+                        </div>
+
+                        <div class="bg-zinc-950/50 p-6 rounded-2xl border border-white/5 flex items-center justify-between">
+                            <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Tes Koneksi Bot Telegram</span>
+                            <button id="test-telegram-btn" class="bg-blue-600/10 text-blue-400 font-black py-2 px-4 rounded-xl border border-blue-600/20 text-[9px] uppercase hover:bg-blue-600/20 transition-all">Kirim Tes</button>
+                        </div>
+
+                        <div class="bg-zinc-950/50 p-6 rounded-2xl border border-white/5 flex items-center justify-between">
+                            <span class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Laporan Mingguan (Telegram)</span>
+                            <button id="send-weekly-report-btn" class="bg-purple-600/10 text-purple-400 font-black py-2 px-4 rounded-xl border border-purple-600/20 text-[9px] uppercase hover:bg-purple-600/20 transition-all whitespace-nowrap">Kirim Laporan</button>
+                        </div>
+                    </div>
+                </div> <div id="transaction-log-container" class="w-full lg:col-span-5 mt-12 lg:mt-0 pt-10 lg:pt-0 border-t lg:border-t-0 lg:border-l border-white/5 lg:pl-10 relative" style="display: none;">
+                    <div class="sticky top-10">
+                        <h3 class="text-[11px] font-black text-zinc-500 uppercase tracking-[0.5em] text-center mb-8">Log Transaksi Sistem</h3>
+                        <div id="transaction-log" class="space-y-5 max-h-[700px] overflow-y-auto pr-3 custom-scroll"></div>
+                    </div>
+                </div>
+                
+                </div> </div>
+        </div>
+
+        <div id="welcome-modal" class="modal-backdrop hidden fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <div class="glass-card p-14 max-w-sm w-full border border-white/10 text-center animate-pulse-soft">
+                <p class="text-orange-500 font-black text-[11px] uppercase tracking-[0.5em] mb-6">RUBELINDO 2026</p>
+                <h2 id="welcome-greeting" class="text-4xl font-black text-white leading-tight tracking-tighter italic"></h2>
+            </div>
+        </div>
+
+        <!-- Modal Struk Digital -->
+        <div id="receipt-modal" class="modal-backdrop hidden fixed inset-0 z-[200] flex items-center justify-center p-6">
+            <div class="glass-card p-0 max-w-sm w-full border border-white/10 overflow-hidden shadow-2xl bg-[#121214]">
+                <div class="p-6 text-center border-b border-white/5 border-dashed bg-zinc-900/50">
+                    <h3 class="text-xl font-black text-white tracking-widest uppercase mb-1">RUBELINDO</h3>
+                    <p class="text-[9px] text-zinc-500 uppercase tracking-[0.3em]">Official Digital Receipt</p>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-zinc-500 uppercase font-bold tracking-wider text-[9px]">Tanggal</span>
+                        <span id="receipt-date" class="text-zinc-300 font-mono text-[10px]"></span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-zinc-500 uppercase font-bold tracking-wider text-[9px]">ID Transaksi</span>
+                        <span id="receipt-id" class="text-zinc-300 font-mono text-[10px]"></span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-zinc-500 uppercase font-bold tracking-wider text-[9px]">Penerima</span>
+                        <span id="receipt-recipient" class="text-white font-bold text-[11px]"></span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-zinc-500 uppercase font-bold tracking-wider text-[9px]">Bank Tujuan</span>
+                        <span id="receipt-bank" class="text-white font-bold text-[11px]"></span>
+                    </div>
+                    <div class="my-4 border-t border-white/5 border-dashed"></div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-zinc-500 uppercase font-bold tracking-wider text-[9px]">Nominal Bayar</span>
+                        <span id="receipt-paid" class="text-orange-400 font-black"></span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-zinc-500 uppercase font-bold tracking-wider text-[9px]">Nominal Terima</span>
+                        <span id="receipt-received" class="text-green-400 font-black text-lg"></span>
+                    </div>
+                    <div class="flex justify-between items-center text-xs mt-2">
+                        <span class="text-zinc-500 uppercase font-bold tracking-wider text-[9px]">Kurs Fixed</span>
+                        <span id="receipt-rate" class="text-zinc-400 font-mono text-[10px]"></span>
+                    </div>
+                </div>
+                <div class="p-6 border-t border-white/5 bg-zinc-950/80 text-center">
+                    <p class="text-[10px] font-black text-green-500 uppercase tracking-widest mb-4">LUNAS / COMPLETED</p>
+                    <button id="close-receipt-btn" class="w-full bg-zinc-800 text-white font-bold py-3 rounded-xl text-[10px] uppercase tracking-widest hover:bg-zinc-700 transition">Tutup Struk</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Pembatalan -->
+        <div id="admin-cancel-modal" class="modal-backdrop hidden fixed inset-0 z-[150] flex items-center justify-center p-6">
+            <div class="glass-card p-10 max-w-sm w-full border border-white/10 shadow-2xl">
+                <h3 class="text-xs font-black text-white mb-6 text-center uppercase tracking-widest">Batalkan Transaksi</h3>
+                <textarea id="cancellation-reason-input" class="w-full bg-zinc-950 border border-white/10 rounded-2xl p-5 text-white text-xs focus:outline-none mb-8" rows="4" placeholder="Alasan pembatalan..."></textarea>
+                <div class="grid grid-cols-2 gap-4">
+                    <button id="cancel-admin-cancel-btn" class="bg-zinc-800 text-zinc-500 font-bold py-4 rounded-xl text-[10px] uppercase tracking-widest">Tutup</button>
+                    <button id="confirm-admin-cancel-btn" class="bg-red-600 text-white font-black py-4 rounded-xl text-[10px] uppercase tracking-widest">Konfirmasi</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Firebase SDK (Ditambahkan Firebase Auth) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyDd5AgxN8wS6XEFvfF-giiv3KbVsLXtPDg",
+            authDomain: "rubelindokonverter.firebaseapp.com",
+            projectId: "rubelindokonverter",
+            storageBucket: "rubelindokonverter.firebasestorage.app",
+            messagingSenderId: "833382665434",
+            appId: "1:833382665434:web:ae66bfbc0f00857f03a9e3",
+            measurementId: "G-NXTJQHMEKC"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth(); 
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const TG_TOKEN = '8203395614:AAGKZKZN717DWSw528Et4VMFphUYMojwCNY';
+            const TG_CHAT_ID = '-4813293516'; 
+
+            const WHATSAPP_NUMBER = '79149496407';
+            const PROCESSING_TIMER_MINUTES = 10;
+            let GLOBAL_WEEKLY_LIMIT = 3000000;
+            const USER_PAYMENT_MINUTES = 15;
+
+            let adminStockIdr = 0, adminStockRub = 0, alertThresholdIdr = 0, alertThresholdRub = 0;
+            let isLowStockAlertSentIdr = false, isLowStockAlertSentRub = false;
+            let weeklySpentAmount = 0, conversionMode = 'IDR_TO_RUB', isSwapped = false, currentRate = { IDR_PER_RUB: 200 };
+            let lastLockedTransaction = null, processingTimerInterval = null, userPaymentTimerInterval = null;
+            let incomeChart = null, offlineCountdownInterval = null, lastTxCount = 0, preOfflineInterval = null;
+            let isEmergencyOffline = false, isForceOnline = false, adminHeartbeatInterval = null, lastAdminSeenTimestamp = null;
+            let activeChatListener = null, adminChatTxId = null, adminCancelTxId = null;
+            let lastTransactionStatuses = new Map(), messageListeners = new Map(), globalTransactions = []; 
+            let payoutSettings = { idr: {}, rub: {} };
+            let lastCompletedTxData = null;
+            let serviceFees = { small: 0.12, medium: 0.10, large: 0.08 };
+            
+            let isAdminLoggedIn = false;
+            let globalUnreadCounts = {}; 
+            let masterDataUnsubscribe = null; 
+            let clientChatInitialized = false; 
+
+            let audioCtx;
+            let audioUnlocked = false;
+            try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+
+            const initAudioContext = () => {
+                if (audioUnlocked || !audioCtx) return;
+                if (audioCtx.state === 'suspended') { audioCtx.resume().then(() => { audioUnlocked = true; }); } else { audioUnlocked = true; }
+            };
+            const sounds = {
+                chatMessage: 'https://assets.mixkit.co/active_storage/sfx/2576/2576-preview.mp3',
+                newOrder: 'https://assets.mixkit.co/active_storage/sfx/2864/2864-preview.mp3',
+                paymentConfirmed: 'https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3',
+                txComplete: 'https://assets.mixkit.co/active_storage/sfx/2039/2039-preview.mp3'
+            };
+
+            const playSound = (type) => {
+                if (!audioUnlocked || !sounds[type]) return;
+                try {
+                    const audio = new Audio(sounds[type]);
+                    audio.volume = 0.6;
+                    audio.play().catch(() => {});
+                } catch (e) { console.log("Audio error"); }
+            };
+            
+            const $ = (selector) => document.querySelector(selector);
+            
+            const confirmationModal = $('#confirmation-modal'), confirmOrderBtn = $('#confirm-order-btn'), cancelOrderBtn = $('#cancel-order-btn'), confirmationAmountEl = $('#confirmation-amount');
+            const adminCancelModal = $('#admin-cancel-modal'), cancellationReasonInput = $('#cancellation-reason-input'), confirmAdminCancelBtn = $('#confirm-admin-cancel-btn'), cancelAdminCancelBtn = $('#cancel-admin-cancel-btn');
+            const adminDashboard = $('#admin-dashboard'), incomeIdrEl = $('#income-idr'), incomeRubEl = $('#income-rub'), totalIncomeEl = $('#total-income');
+            
+            const stockIdrDisplay = $('#stock-idr-display'), stockRubDisplay = $('#stock-rub-display');
+            const addStockIdrInput = $('#add-stock-idr-input'), addStockIdrBtn = $('#add-stock-idr-btn');
+            const addStockRubInput = $('#add-stock-rub-input'), addStockRubBtn = $('#add-stock-rub-btn');
+            const alertThresholdIdrDisplay = $('#alert-threshold-idr-display'), alertThresholdRubDisplay = $('#alert-threshold-rub-display');
+            const alertThresholdIdrInput = $('#alert-threshold-idr-input'), updateThresholdIdrBtn = $('#update-threshold-idr-btn');
+            const alertThresholdRubInput = $('#alert-threshold-rub-input'), updateThresholdRubBtn = $('#update-threshold-rub-btn');
+
+            const pinForm = $('#pin-form'), loginEmailInput = $('#admin-email'), loginPasswordInput = $('#admin-password'), loginSubmit = $('#login-submit'), loginError = $('#login-error'), logoutBtn = $('#logout-btn');
+            const transactionLogContainer = $('#transaction-log-container'), converterCard = $('#converter-card'), completedCard = $('#completed-card'), completedTxId = $('#completed-tx-id'), mainContentWrapper = $('#main-content-wrapper'), offlineOverlay = $('#offline-overlay'), offlineTimer = $('#offline-timer');
+            const preOfflineTimerContainer = $('#pre-offline-timer-container'), preOfflineTimer = $('#pre-offline-timer'), newTransactionButton = $('#new-transaction-button');
+            const fromAmountInput = $('#from-amount'), toAmountDisplay = $('#to-amount'), fromCurrencyLabel = $('#from-currency-label'), toCurrencyLabel = $('#to-currency-label'), swapButton = $('#swap-button'), limitDisplay = $('#limit-display'), errorMessage = $('#error-message');
+            const resultDetails = $('#result-details'), userDetailsForm = $('#user-details-form'), userNameInput = $('#user-name'), detailFrom = $('#detail-from'), detailTo = $('#detail-to'), detailFee = $('#detail-fee'), detailFeeLabel = $('#detail-fee-label'), detailRate = $('#detail-rate');
+            const userBankSelect = $('#user-bank'), userAccountInput = $('#user-account'), userAccountLabel = $('#user-account-label'), fz161Agree = $('#fz161-agree'), rateInfo = $('#rate-info'), lockButton = $('#lock-button'), lockButtonText = $('#lock-button-text'), lockLoader = $('#lock-loader'), successMessage = $('#success-message'), transactionLog = $('#transaction-log'), userHistoryPanel = $('#user-history-panel'), userHistoryLog = $('#user-history-log');
+            const ratingDisplay = $('#rating-display'), completedRatingStars = $('#completed-rating-stars'), ratingThanks = $('#rating-thanks');
+            const manualOfflineToggle = $('#manual-offline-toggle'), manualOfflineSwitch = $('#manual-offline-switch'), adminStatusIndicator = $('#admin-status-indicator'), limitInfo = $('#limit-info'), faqSection = $('#faq-section'), howToUseSection = $('#how-to-use-section');
+            const forceOnlineToggle = $('#force-online-toggle'), forceOnlineSwitch = $('#force-online-switch');
+            const testTelegramBtn = $('#test-telegram-btn'), sendWeeklyReportBtn = $('#send-weekly-report-btn');
+            const adminChatModal = $('#admin-chat-modal'), closeChatModalBtn = $('#close-chat-modal-btn'), adminChatTxIdEl = $('#admin-chat-txid'), adminChatMessages = $('#admin-chat-messages'), adminChatForm = $('#admin-chat-form'), adminChatInput = $('#admin-chat-input'), userViewWrapper = $('#user-view-wrapper');
+            const manualRateInput = $('#manual-rate-input'), updateRateButton = $('#update-rate-button'), currentRateDisplay = $('#current-rate-display');
+
+            const bankLists = {
+                indonesia: [ { value: "BCA", text: "BCA" }, { value: "Mandiri", text: "Mandiri" }, { value: "BRI", text: "BRI" }, { value: "BNI", text: "BNI" }, { value: "CIMB Niaga", text: "CIMB Niaga" }, { value: "Jenius/BTPN", text: "Jenius/BTPN" }, { value: "Bank Jago", text: "Bank Jago" }, { value: "Lainnya (ID)", text: "Lainnya (ID)" } ],
+                rusia: [ { value: "Sberbank", text: "Sberbank" }, { value: "Tinkoff", text: "Tinkoff" }, { value: "VTB", text: "VTB" }, { value: "Alfa-Bank", text: "Alfa-Bank" }, { value: "Lainnya (RU)", text: "Lainnya (RU)" } ]
+            };
+
+            const showWelcomePopup = () => {
+                if (sessionStorage.getItem('welcomeShown')) return;
+                const h = new Date().getHours(), g = h < 12 ? 'Pagi' : h < 15 ? 'Siang' : h < 18 ? 'Sore' : 'Malam';
+                $('#welcome-greeting').textContent = 'Selamat ' + g; $('#welcome-modal').classList.remove('hidden');
+                setTimeout(() => { $('#welcome-modal').classList.add('hidden'); }, 3000);
+                sessionStorage.setItem('welcomeShown', 'true');
+            };
+
+            const formatCurrency = (v, c, d = 0) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: c, minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
+            const formatNumber = (v, d = 2) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v);
+            const getStartOfDayWIB = (date = new Date()) => { const utc = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), date.getUTCHours(), date.getUTCMinutes(), date.getUTCSeconds()); const off = 7 * 60 * 60 * 1000; const wib = new Date(utc + off); wib.setUTCHours(0, 0, 0, 0); return new Date(wib.getTime() - off); };
+            const getStartOfWeekWIB = () => { const now = new Date(), off = 7 * 60 * 60 * 1000, wib = new Date(now.getTime() + off); const day = wib.getUTCDay(), sub = (day + 6) % 7; const start = new Date(wib); start.setUTCDate(wib.getUTCDate() - sub); start.setUTCHours(0, 0, 0, 0); return new Date(start.getTime() - off); };
+            const getServiceFeeRate = (amt) => {
+                const fees = typeof serviceFees !== 'undefined' ? serviceFees : { small: 0.12, medium: 0.10, large: 0.08 };
+                if (amt < 1000000) return fees.small || 0.12;
+                if (amt < 4000000) return fees.medium || 0.10;
+                return fees.large || 0.08;
+            };
+            const escapeHTML = (str) => { return (str || '').toString().replace(/[<>&]/g, ""); };
+
+            const sendToTelegramAPI = async (text) => {
+                const url = `https://api.telegram.org/bot${TG_TOKEN}/sendMessage`;
+                const formData = new FormData();
+                formData.append('chat_id', TG_CHAT_ID);
+                formData.append('text', text);
+                formData.append('parse_mode', 'HTML');
+                try { 
+                    const res = await fetch(url, { method: 'POST', body: formData }); 
+                    const data = await res.json();
+                    return data.ok;
+                } catch (e) { return false; }
+            };
+
+            const sendTelegramNotification = async (txData, txId) => {
+                const userName = txData.userDetails ? txData.userDetails.name : 'Pelanggan';
+                const userBank = txData.userDetails ? txData.userDetails.bank : 'Bank';
+                const userAccount = txData.userDetails ? txData.userDetails.account : '-';
+                const text = `🔔 <b>PESANAN BARU</b> (Pending)\n---------------------------\n🆔 ID: <code>${txId}</code>\n👤 User: ${escapeHTML(userName)}\n🏦 Bank: ${escapeHTML(userBank)} (${escapeHTML(userAccount)})\n\n💰 Tukar: ${formatCurrency(txData.fromAmount, txData.fromCurrency)}\n⬇️\n🇷🇺 Terima: ${formatCurrency(txData.toAmount, txData.toCurrency)}\n\n⏳ Deadline: 15 Menit\n---------------------------\nSegera cek mutasi rekening!`;
+                await sendToTelegramAPI(text);
+            };
+
+            const sendTelegramText = async (text) => { await sendToTelegramAPI(text); };
+
+            const sendTelegramTest = async () => {
+                testTelegramBtn.textContent = 'MENGUJI...'; testTelegramBtn.disabled = true;
+                try {
+                    const delay = ms => new Promise(res => setTimeout(res, ms));
+                    const success = await sendToTelegramAPI(`🤖 <b>MEMULAI TES SISTEM BOT RUBELINDO</b> 🚀\nMohon tunggu, bot sedang mengirimkan contoh simulasi semua notifikasi...`);
+                    if (!success) throw new Error("Gagal");
+                    await delay(1500);
+                    const mockTxData = { userDetails: { name: 'Bapak Tester', bank: 'BCA', account: '1234567890' }, fromAmount: 1000000, fromCurrency: 'IDR', toAmount: 5000, toCurrency: 'RUB' };
+                    await sendTelegramNotification(mockTxData, 'TX-TEST-001');
+                    await delay(1500);
+                    await sendTelegramText(`🚨 <b>USER SUDAH TRANSFER! (TES)</b> 🚨\n\nTransaksi ID: <code>TX-TEST-001</code>\nStatus: <b>Menunggu Konfirmasi Admin</b>\n\nUser telah menekan tombol konfirmasi. Silakan buka mutasi Rekening/Bank Anda SEKARANG untuk memverifikasi dana masuk!`);
+                    await delay(1500);
+                    await sendTelegramText(`✅ <b>TRANSAKSI SELESAI (TES)</b> ✅\n---------------------------\n👤 User: Bapak Tester\n🆔 ID: <code>TX-TEST-001</code>\n\n💰 Profit Estimasi: <b>${formatCurrency(50000, 'IDR')}</b>\n---------------------------\nKerja bagus tim! 🚀`);
+                    await delay(1500);
+                    await sendToTelegramAPI(`✅ <b>TES SELESAI</b> ✅`);
+                    testTelegramBtn.textContent = 'TERKIRIM!'; testTelegramBtn.classList.replace('text-blue-400', 'text-green-400'); testTelegramBtn.classList.replace('border-blue-600/20', 'border-green-600/20'); 
+                    setTimeout(() => { testTelegramBtn.textContent = 'KIRIM TES'; testTelegramBtn.classList.replace('text-green-400', 'text-blue-400'); testTelegramBtn.classList.replace('border-green-600/20', 'border-blue-600/20'); testTelegramBtn.disabled = false; }, 3000);
+                } catch (e) { testTelegramBtn.textContent = 'KIRIM TES'; testTelegramBtn.disabled = false; }
+            };
+
+            const checkOperationalHours = () => {
+                if (isEmergencyOffline) {
+                    offlineOverlay.classList.remove('hidden'); mainContentWrapper.classList.add('opacity-20', 'pointer-events-none');
+                    offlineTimer.textContent = "Admin Shutdown"; preOfflineTimerContainer.classList.add('hidden'); return;
+                }
+                const now = new Date(), utc = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours(), now.getUTCMinutes(), now.getUTCSeconds());
+                const off = 7 * 60 * 60 * 1000, wib = new Date(utc + off);
+                const h = wib.getUTCHours();
+                const online = (h >= 7 && h < 23) || isForceOnline;
+
+                if (online) {
+                    if (offlineCountdownInterval) { clearInterval(offlineCountdownInterval); offlineCountdownInterval = null; }
+                    offlineOverlay.classList.add('hidden'); mainContentWrapper.classList.remove('opacity-20', 'pointer-events-none');
+                    if (!isForceOnline) {
+                        const close = new Date(wib); close.setUTCHours(23, 0, 0, 0);
+                        const rem = close.getTime() - wib.getTime();
+                        if (rem <= 30 * 60 * 1000 && !preOfflineInterval) {
+                            preOfflineTimerContainer.classList.remove('hidden');
+                            const update = () => { const r = close.getTime() - (Date.now() + off); if (r <= 0) { preOfflineTimerContainer.classList.add('hidden'); clearInterval(preOfflineInterval); preOfflineInterval = null; return; } const m = Math.floor((r / 1000 / 60) % 60), s = Math.floor((r / 1000) % 60); preOfflineTimer.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; };
+                            update(); preOfflineInterval = setInterval(update, 1000);
+                        }
+                    } else { preOfflineTimerContainer.classList.add('hidden'); if(preOfflineInterval) { clearInterval(preOfflineInterval); preOfflineInterval = null; } }
+                } else {
+                    if(preOfflineInterval) { clearInterval(preOfflineInterval); preOfflineInterval = null; } preOfflineTimerContainer.classList.add('hidden');
+                    if (!offlineCountdownInterval) {
+                        const open = new Date(wib); if (h < 7) open.setUTCHours(7, 0, 0, 0); else { open.setUTCDate(open.getUTCDate() + 1); open.setUTCHours(7, 0, 0, 0); }
+                        const update = () => { const r = open.getTime() - (Date.now() + off); if (r <= 0) { offlineTimer.textContent = "Booting..."; clearInterval(offlineCountdownInterval); offlineCountdownInterval = null; checkOperationalHours(); return; } const hr = Math.floor((r / (1000 * 60 * 60)) % 24), mn = Math.floor((r / 1000 / 60) % 60), sc = Math.floor((r / 1000) % 60); offlineTimer.textContent = `Kembali Dalam: ${String(hr).padStart(2, '0')}:${String(mn).padStart(2, '0')}:${String(sc).padStart(2, '0')}`; };
+                        update(); offlineCountdownInterval = setInterval(update, 1000);
+                    }
+                    offlineOverlay.classList.remove('hidden'); mainContentWrapper.classList.add('opacity-20', 'pointer-events-none');
+                }
+            };
+            
+            const renderRatingStars = (cont, val = 0, inter = false) => {
+                cont.innerHTML = '';
+                if (inter) cont.classList.add('rating-stars'); else cont.classList.remove('rating-stars');
+                for (let i = 1; i <= 5; i++) {
+                    const c = i <= val ? 'text-yellow-400' : 'text-zinc-700';
+                    cont.innerHTML += `<svg data-value="${i}" class="w-8 h-8 ${c} transition cursor-${inter?'pointer':'default'}" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg>`;
+                }
+            };
+            
+            const resetToConverterScreen = () => { 
+                localStorage.removeItem('activeTransaction'); 
+                if (processingTimerInterval) clearInterval(processingTimerInterval); 
+                if (userPaymentTimerInterval) clearInterval(userPaymentTimerInterval); 
+                if (activeChatListener) activeChatListener(); 
+                userViewWrapper.classList.remove('hidden'); 
+                userHistoryPanel.classList.add('hidden'); 
+                completedCard.classList.add('hidden'); 
+                fromAmountInput.value = ''; 
+                resetUI(); 
+                clientChatInitialized = false; 
+            };
+
+            const resetUI = () => { 
+                toAmountDisplay.textContent = '0'; 
+                resultDetails.classList.remove('fade-in-up'); 
+                userDetailsForm.classList.remove('fade-in-up'); 
+                resultDetails.classList.add('hidden'); 
+                userDetailsForm.classList.add('hidden'); 
+                
+                // AUTO-FILL LOGIC: Cek apakah ada data tersimpan di HP/Laptop user
+                const savedUser = JSON.parse(localStorage.getItem('savedUserDetails'));
+                if (savedUser) {
+                    userNameInput.value = savedUser.name || '';
+                    userBankSelect.value = savedUser.bank || '';
+                    userAccountInput.value = savedUser.account || '';
+                } else {
+                    userNameInput.value = ''; 
+                    userBankSelect.value = ''; 
+                    userAccountInput.value = ''; 
+                }
+                
+                if(fz161Agree) fz161Agree.checked = false; 
+                errorMessage.classList.add('hidden'); 
+                lockButton.classList.add('hidden'); 
+                successMessage.classList.add('hidden'); 
+                lockButton.disabled = true; 
+                fromAmountInput.disabled = false; 
+                lastLockedTransaction = null; 
+            };
+            const validateUserDetails = () => { const n = userNameInput.value.trim(), b = userBankSelect.value, a = userAccountInput.value.trim(), agreed = fz161Agree ? fz161Agree.checked : false; lockButton.disabled = !(n && b && a && agreed && lastLockedTransaction); };
+
+            const calculateConversion = () => {
+                resetUI(); 
+                const rawVal = fromAmountInput.value.replace(/\./g, '').replace(',', '.');
+                const amt = parseFloat(rawVal);
+                
+                if (isNaN(amt) || amt <= 0) { 
+                    toAmountDisplay.textContent = '0'; 
+                    return; 
+                }
+
+               // Menggunakan IDR_PER_RUB dari database
+                const rate = currentRate.IDR_PER_RUB || 200;
+                const isI2R = conversionMode === 'IDR_TO_RUB';
+                
+                // Hitung Nilai Rupiah (untuk menentukan tier biaya layanan)
+                const idrEquiv = isI2R ? amt : amt * rate;
+                
+                if (idrEquiv < 100000) { 
+                    errorMessage.textContent = 'Minimum Transaksi Rp 100.000.'; 
+                    errorMessage.classList.remove('hidden'); 
+                    return; 
+                }
+
+                const remLimit = GLOBAL_WEEKLY_LIMIT - weeklySpentAmount;
+                if (idrEquiv > remLimit) { 
+                    errorMessage.textContent = `Limit mingguan tersisa: ${formatCurrency(remLimit, 'IDR')}`; 
+                    errorMessage.classList.remove('hidden'); 
+                    return; 
+                }
+                
+                // AMBIL RATE BIAYA DARI DATABASE
+                const feeRate = getServiceFeeRate(idrEquiv);
+                
+                const fromC = isI2R ? 'IDR' : 'RUB';
+                const toC = isI2R ? 'RUB' : 'IDR';
+                
+                let converted, feeAmt, finalAmt, feeIdr, feeRub;
+
+                if (isI2R) {
+                    converted = amt / rate;
+                    feeAmt = converted * feeRate;
+                    // Pembulatan Rubel (2 desimal)
+                    finalAmt = Math.floor((converted - feeAmt) * 100) / 100;
+                    feeRub = feeAmt;
+                    feeIdr = feeAmt * rate;
+                } else {
+                    converted = amt * rate;
+                    feeAmt = converted * feeRate;
+                    // Pembulatan Rupiah (Bulat)
+                    finalAmt = Math.floor(converted - feeAmt);
+                    feeIdr = feeAmt;
+                    feeRub = feeAmt / rate;
+                }
+                
+                // Cek Stok Admin
+                if (isI2R && finalAmt > adminStockRub) { 
+                    errorMessage.textContent = `Stok RUB tidak mencukupi (Tersedia: ${formatNumber(adminStockRub, 2)} RUB)`; 
+                    errorMessage.classList.remove('hidden'); 
+                    return; 
+                }
+                if (!isI2R && finalAmt > adminStockIdr) { 
+                    errorMessage.textContent = `Stok IDR tidak mencukupi (Tersedia: ${formatCurrency(adminStockIdr, 'IDR')})`; 
+                    errorMessage.classList.remove('hidden'); 
+                    return; 
+                }
+                
+                // UPDATE TAMPILAN UI
+                toAmountDisplay.textContent = isI2R ? formatNumber(finalAmt, 2) : formatNumber(finalAmt, 0);
+                detailFrom.textContent = `${formatNumber(amt, 0)} ${fromC}`;
+                detailTo.textContent = isI2R ? `${formatNumber(finalAmt, 2)} ${toC}` : `${formatCurrency(finalAmt, 'IDR')}`;
+                
+                // Menampilkan Persentase Biaya yang Sesuai Database
+                detailFeeLabel.textContent = `Biaya Layanan (${(feeRate * 100).toFixed(0)}%):`;
+                detailFee.textContent = isI2R ? `- ${formatNumber(feeRub, 2)} RUB` : `- ${formatCurrency(feeIdr, 'IDR')}`;
+                detailRate.textContent = `1 RUB = ${formatNumber(rate, 0)} IDR`;
+
+                resultDetails.classList.remove('hidden');
+                userDetailsForm.classList.remove('hidden');
+                lockButton.classList.remove('hidden');
+                validateUserDetails();
+
+                // Simpan data untuk proses penguncian pesanan
+                lastLockedTransaction = { 
+                    fromAmount: amt, fromCurrency: fromC, 
+                    toAmount: finalAmt, toCurrency: toC, 
+                    feeIdr: feeIdr, feeRub: feeRub, rate: rate,
+                    feeRate: feeRate // Menyimpan rate yang digunakan saat itu
+                };
+            };
+
+            const lockTransaction = async () => {
+                if (!lastLockedTransaction || lockButton.disabled) return; 
+                
+                lockButton.disabled = true; 
+                lockLoader.classList.remove('hidden'); 
+                lockButtonText.textContent = "MENGUNCI HARGA..."; 
+                
+                const userDet = { 
+                    name: userNameInput.value.trim(), 
+                    bank: userBankSelect.value, 
+                    account: userAccountInput.value.trim() 
+                };
+
+                try {
+                    const txId = `TX-${Date.now()}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
+                    const deadline = new Date(Date.now() + USER_PAYMENT_MINUTES * 60 * 1000);
+                    
+                    await db.collection('transactions').doc(txId).set({ 
+                        ...lastLockedTransaction, 
+                        userDetails: userDet, 
+                        status: 'Menunggu Pembayaran', 
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(), 
+                        paymentDeadline: firebase.firestore.Timestamp.fromDate(deadline) 
+                    });
+                    localStorage.setItem('savedUserDetails', JSON.stringify(userDet));
+                    // Kirim notifikasi secara async (tidak menghambat UI)
+                    sendTelegramNotification({ ...lastLockedTransaction, userDetails: userDet }, txId);
+                    
+                    localStorage.setItem('activeTransaction', JSON.stringify({id: txId}));
+                    successMessage.textContent = 'PESANAN BERHASIL DIBUAT!';
+                    successMessage.classList.remove('hidden');
+                    lockButton.classList.add('hidden');
+                    
+                    setTimeout(() => { 
+                        userViewWrapper.classList.add('hidden'); 
+                        displayUserHistory(); 
+                    }, 1000);
+
+                } catch (e) {
+                    console.error(e);
+                    errorMessage.textContent = 'Gagal terhubung ke server. Coba lagi.';
+                    errorMessage.classList.remove('hidden');
+                    lockButton.disabled = false;
+                } finally {
+                    lockLoader.classList.add('hidden');
+                    lockButtonText.textContent = 'Kunci Harga & Buat Pesanan';
+                }
+            };
+            
+            const startProcessingTimer = (conf) => {
+                if (processingTimerInterval) clearInterval(processingTimerInterval); const el = $('#processing-timer'); if(!el) return;
+                const end = conf.toMillis() + (PROCESSING_TIMER_MINUTES * 60 * 1000);
+                processingTimerInterval = setInterval(() => {
+                    const r = end - Date.now();
+                    if (r <= 0) { clearInterval(processingTimerInterval); el.innerHTML = 'Admin sedang sibuk - Review Manual'; return; }
+                    const m = Math.floor((r / 1000 / 60) % 60), s = Math.floor((r / 1000) % 60); el.textContent = `Estimasi Selesai: ${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+                }, 1000);
+            };
+
+            const initChat = (id, contId, formId, inpId, send) => {
+                if (activeChatListener) activeChatListener(); 
+                const cont = document.querySelector(contId), form = document.querySelector(formId), inp = document.querySelector(inpId);
+                if(!cont || !form || !inp) return;
+
+                activeChatListener = db.collection('transactions').doc(id).collection('messages').onSnapshot(snap => {
+                    let playSnd = false;
+                    snap.docChanges().forEach(ch => { 
+                        if (ch.type === 'added') {
+                            const d = ch.doc.data();
+                            if ((send === 'user' && d.sender === 'admin') || (send === 'admin' && d.sender === 'user')) {
+                                playSnd = true;
+                                if (!d.isRead) { ch.doc.ref.update({ isRead: true }).catch(()=>{}); }
+                            }
+                        }
+                    });
+                    
+                    if (playSnd && document.visibilityState === 'visible') playSound('chatMessage');
+                    
+                    const msgs = [];
+                    snap.forEach(doc => msgs.push(doc.data()));
+                    msgs.sort((a, b) => {
+                        const tA = a.timestamp ? a.timestamp.toMillis() : (a.localTimestamp || Date.now());
+                        const tB = b.timestamp ? b.timestamp.toMillis() : (b.localTimestamp || Date.now());
+                        return tA - tB;
+                    });
+                    
+                    cont.innerHTML = ''; 
+                    msgs.forEach(m => { 
+                        const b = document.createElement('div'); 
+                        b.className = `chat-bubble p-4 text-[11px] rounded-2xl max-w-[85%] ${send === m.sender ? 'sender text-white self-end' : 'receiver text-zinc-300 self-start'}`; 
+                        b.textContent = m.text; 
+                        cont.appendChild(b); 
+                    });
+                    cont.scrollTop = cont.scrollHeight; 
+                });
+                
+                form.onsubmit = (e) => { 
+                    e.preventDefault(); 
+                    const t = inp.value.trim(); 
+                    if (t) { 
+                        db.collection('transactions').doc(id).collection('messages').add({ text: t, sender: send, timestamp: firebase.firestore.FieldValue.serverTimestamp(), localTimestamp: Date.now(), isRead: false }); 
+                        inp.value = ''; 
+                    } 
+                };
+            };
+
+            // === SOLUSI 1: PEMISAHAN KOTAK CHAT AGAR TIDAK HILANG SAAT RENDER ULANG STATUS ===
+            // Reset state chat agar tidak menumpuk saat render ulang
+            const displayUserHistory = () => {
+                if (activeChatListener) { activeChatListener(); activeChatListener = null; }
+                clientChatInitialized = false;
+
+                const txStr = localStorage.getItem('activeTransaction'); 
+                if (!txStr) return;
+                const tx = JSON.parse(txStr); 
+                if (!tx || !tx.id) return;
+                
+                userViewWrapper.classList.add('hidden'); 
+                userHistoryPanel.classList.remove('hidden'); 
+                if (userPaymentTimerInterval) { clearInterval(userPaymentTimerInterval); userPaymentTimerInterval = null; }
+                
+                db.collection('transactions').doc(tx.id).onSnapshot({ includeMetadataChanges: true }, (doc) => {
+                    try {
+                        if (!doc.exists) { resetToConverterScreen(); return; }
+                        const d = doc.data();
+                        const st = d.status || 'pending';
+                        const old = sessionStorage.getItem(`tx-status-${doc.id}`);
+                        
+                        if (st === 'Selesai' && old !== 'Selesai') {
+                            try { playSound('txComplete'); } catch(e){}
+                        }
+                        sessionStorage.setItem(`tx-status-${doc.id}`, st);
+                        
+                        let sH = '', aH = '', eH = ''; 
+                        if (userPaymentTimerInterval) { clearInterval(userPaymentTimerInterval); userPaymentTimerInterval = null; }
+                        
+                        // Menangani Kontainer Chat (Dimunculkan hanya jika belum Selesai/Batal)
+                        const chatContainer = document.getElementById('user-chat-container');
+                        if (st === 'Selesai' || st === 'Dibatalkan') {
+                            if (chatContainer) chatContainer.classList.add('hidden');
+                        } else {
+                            if (chatContainer) chatContainer.classList.remove('hidden');
+                            if (!clientChatInitialized) {
+                                initChat(doc.id, '#user-chat-messages', '#user-chat-form', '#user-chat-input', 'user');
+                                clientChatInitialized = true;
+                            }
+                        }
+
+                        if (st === 'Selesai') {
+                            lastCompletedTxData = { id: doc.id, ...d }; // Simpan data untuk Struk Digital
+                            sH = `<div class="p-5 bg-green-500/10 rounded-2xl border border-green-500/20 mb-6 text-center animate-pulse"><p class="text-4xl font-black text-center text-green-400 italic tracking-tighter uppercase">BERHASIL</p></div>`;
+                            userHistoryLog.innerHTML = `<div class="space-y-4"><p class="text-center text-[9px] font-mono text-zinc-700 tracking-[0.5em] mb-4 uppercase">${doc.id}</p>${sH}</div>`;
+                            
+                            setTimeout(() => { 
+                                if(completedTxId) completedTxId.textContent = doc.id; 
+                                userHistoryPanel.classList.add('hidden'); 
+                                completedCard.classList.remove('hidden'); 
+                                renderRatingStars(completedRatingStars, d.rating || 0, !d.rating); 
+                            }, 1200);
+                            
+                        } else if (st === 'Dibatalkan') {
+                            sH = `<p class="text-xl font-bold text-center text-red-500 uppercase tracking-widest">DIBATALKAN</p>`;
+                            if (d.cancellationReason) { 
+                                eH = `<div class="mt-4 p-5 bg-red-500/10 border border-red-500/20 rounded-3xl text-red-300 text-[10px] text-center uppercase tracking-widest leading-relaxed"><strong>Alasan:</strong> ${d.cancellationReason}<br><span id="cancel-reset-timer" class="block mt-3 opacity-60 font-mono"></span></div>`; 
+                                let s = 15; 
+                                const rt = setInterval(() => { 
+                                    const el = $('#cancel-reset-timer'); 
+                                    if (el) { el.textContent = `Reset dalam ${s} detik`; if (s-- < 0) { clearInterval(rt); resetToConverterScreen(); } } else clearInterval(rt); 
+                                }, 1000); 
+                            } else setTimeout(resetToConverterScreen, 5000);
+                            userHistoryLog.innerHTML = `<div class="space-y-4"><p class="text-center text-[9px] font-mono text-zinc-700 tracking-[0.5em] mb-8 uppercase">${doc.id}</p>${eH}${sH}</div>`;
+                            
+                        } else if (st === 'Menunggu Pembayaran') {
+                            const isI = d.fromCurrency === 'IDR', a = isI ? formatCurrency(d.fromAmount, 'IDR') : `${formatNumber(d.fromAmount, 2)} RUB`;
+                            const bH = isI ? `<div class="space-y-4">
+    <div class="flex justify-between items-center"><span class="text-zinc-600">Penerima</span><strong class="text-white text-[11px]">${payoutSettings.idr.name || '-'}</strong></div>
+    <div class="flex justify-between items-center"><span class="text-zinc-600">Bank</span><strong class="text-white text-[11px]">${payoutSettings.idr.bank || '-'}</strong></div>
+    <div class="flex justify-between items-center"><span class="text-zinc-600">Rekening</span><div class="flex items-center gap-3"><strong class="text-white font-mono text-xs">${payoutSettings.idr.acc || '-'}</strong><svg class="copy-icon w-4 h-4 text-zinc-500 cursor-pointer" data-copy="${payoutSettings.idr.acc || ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></div></div>
+</div>` : 
+`<div class="space-y-4">
+    <div class="flex justify-between items-center"><span class="text-zinc-600">Penerima</span><strong class="text-white text-[11px]">${payoutSettings.rub.name || '-'}</strong></div>
+    <div class="flex justify-between items-center"><span class="text-zinc-600">Bank</span><strong class="text-white text-[11px]">${payoutSettings.rub.bank || '-'}</strong></div>
+    <div class="flex justify-between items-center"><span class="text-zinc-600">SBP/Nomor</span><div class="flex items-center gap-3"><strong class="text-white font-mono text-xs">${payoutSettings.rub.acc || '-'}</strong><svg class="copy-icon w-4 h-4 text-zinc-500 cursor-pointer" data-copy="${payoutSettings.rub.acc || ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></div></div>
+</div>`;
+                            eH = `<div class="my-8 text-center bg-zinc-950 p-8 rounded-[2rem] border border-white/5 shadow-inner"><p class="text-[10px] uppercase font-black text-orange-500 mb-3 tracking-[0.2em]">Batas Waktu Pembayaran</p><p id="user-payment-timer" class="font-black text-4xl text-white tracking-tighter italic"></p></div>`;
+                            sH = `<div class="my-6 text-center"><p class="text-zinc-500 font-bold text-[10px] uppercase mb-3">Dana Yang Harus Dikirim:</p><p class="text-4xl font-black text-white mb-10 tracking-tighter">${a}</p><div class="bg-zinc-900/50 p-6 rounded-2xl text-left text-[11px] border border-white/5 shadow-inner">${bH}</div></div>`;
+                            aH = `<button id="confirm-payment-button" data-id="${doc.id}" class="mt-8 w-full primary-btn text-white font-black py-5 rounded-[1.5rem] text-[10px] uppercase tracking-[0.3em]">SAYA SUDAH BAYAR</button>`;
+                            
+                            userHistoryLog.innerHTML = `<div class="space-y-4"><p class="text-center text-[9px] font-mono text-zinc-700 tracking-[0.5em] mb-8 uppercase">${doc.id}</p>${eH}${sH}${aH}</div>`;
+                            
+                            if (d.paymentDeadline) { 
+                                const end = d.paymentDeadline.toMillis(); 
+                                userPaymentTimerInterval = setInterval(() => { 
+                                    const el = $('#user-payment-timer'); 
+                                    if (!el) { clearInterval(userPaymentTimerInterval); return; } 
+                                    const r = end - Date.now(); 
+                                    if (r <= 0) { clearInterval(userPaymentTimerInterval); db.collection('transactions').doc(doc.id).update({ status: 'Dibatalkan', cancellationReason: 'Waktu Habis' }); return; } 
+                                    const mn = Math.floor((r/1000/60)%60), sc = Math.floor((r/1000)%60); 
+                                    el.textContent = `${String(mn).padStart(2,'0')}:${String(sc).padStart(2,'0')}`; 
+                                }, 1000); 
+                            }
+                        } else {
+                            sH = `<div class="p-5 bg-orange-500/5 rounded-2xl border border-orange-500/10 mb-6 text-center"><p class="font-black text-orange-500 uppercase tracking-[0.4em] text-[11px]">${st}</p></div>`;
+                            const isI = d.fromCurrency === 'IDR', a = isI ? formatCurrency(d.fromAmount, 'IDR') : `${formatNumber(d.fromAmount, 2)} RUB`;
+                            const m = encodeURIComponent(`Admin, saya sudah bayar ${doc.id} sebesar ${a}.`);
+                            aH = `<div id="processing-timer" class="text-2xl font-black text-center my-8 text-red-500 tracking-tighter italic"></div><div class="space-y-4"><a href="https://wa.me/${WHATSAPP_NUMBER}?text=${m}" target="_blank" class="block w-full text-center bg-green-500/10 border border-green-500/20 text-green-500 font-black py-5 rounded-2xl text-[10px] uppercase tracking-widest">Kirim Bukti via WhatsApp</a><button id="cancel-button" data-id="${doc.id}" class="hidden w-full bg-red-500/5 text-red-500/40 font-black py-4 rounded-xl text-[9px] uppercase">Batalkan Transaksi</button></div>`;
+                            
+                            userHistoryLog.innerHTML = `<div class="space-y-4"><p class="text-center text-[9px] font-mono text-zinc-700 tracking-[0.5em] mb-8 uppercase">${doc.id}</p>${sH}${aH}</div>`;
+                            
+                            if (d.paymentConfirmedAt) {
+                                startProcessingTimer(d.paymentConfirmedAt); 
+                            }
+                        }
+
+                    } catch (err) {
+                        console.error("Error UI Klien:", err);
+                    }
+                }, (err) => { console.error("Koneksi terputus:", err); });
+            };
+
+            const updateAdminDashboard = (txs) => {
+                try {
+                    let fI = 0, fR = 0; 
+                    txs.forEach(tx => { 
+                        if (tx.status === 'Selesai') { 
+                            if (tx.fromCurrency === 'IDR') fR += (tx.feeRub || 0); 
+                            else fI += (tx.feeIdr || 0); 
+                        } 
+                    });
+                    const tot = fI + (fR * currentRate.IDR_PER_RUB);
+                    
+                    if(incomeIdrEl) incomeIdrEl.textContent = formatCurrency(fI, 'IDR'); 
+                    if(incomeRubEl) incomeRubEl.textContent = `${formatNumber(fR, 2)} RUB`; 
+                    if(totalIncomeEl) totalIncomeEl.textContent = formatCurrency(tot, 'IDR');
+                    
+                    const wD = Array(7).fill(0);
+                    const ds = Array(7).fill(0).map((_, i) => { const d = new Date(); d.setDate(d.getDate() - i); return d; }).reverse();
+                    
+                    txs.forEach(tx => { 
+                        if (tx.status === 'Selesai' && tx.createdAt && typeof tx.createdAt.toMillis === 'function') { 
+                            const d = tx.createdAt.toDate();
+                            const ix = ds.findIndex(day => d.getFullYear() === day.getFullYear() && d.getMonth() === day.getMonth() && d.getDate() === day.getDate()); 
+                            if (ix !== -1) wD[ix] += (tx.feeIdr || 0); 
+                        } 
+                    });
+                    
+                    const chartEl = $('#income-chart');
+                    if (chartEl) {
+                        const ctx = chartEl.getContext('2d');
+                        const lbs = ds.map((d,i) => i===6 ? 'HARI INI' : d.toLocaleDateString('id-ID',{weekday:'short'}));
+                        if (incomeChart) {
+                            incomeChart.data.labels = lbs;
+                            incomeChart.data.datasets[0].data = wD;
+                            incomeChart.update();
+                        } else {
+                            incomeChart = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: lbs,
+                                    datasets: [{
+                                        label: 'IDR',
+                                        data: wD,
+                                        borderColor: '#f97316',
+                                        backgroundColor: 'rgba(249, 115, 22, 0.05)',
+                                        fill: true,
+                                        tension: 0.4,
+                                        pointRadius: 0
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    plugins: { legend: { display: false } },
+                                    scales: {
+                                        y: { beginAtZero: true, grid: { color: '#ffffff05' }, ticks: { color: '#52525b', font: { size: 9 } } },
+                                        x: { grid: { display: false }, ticks: { color: '#52525b', font: { size: 9 } } }
+                                    }
+                                }
+                            });
+                        }
+                    }
+                } catch (dashboardErr) {}
+            };
+            
+            // Fungsi untuk menampilkan/menyembunyikan banner di layar user
+            const handleAnnouncementSnapshot = (doc) => {
+                const data = doc.data();
+                const banner = document.getElementById('broadcast-banner');
+                const inputAdmin = document.getElementById('broadcast-input');
+                const txt = (data && data.text) ? data.text.trim() : "";
+                
+                if (txt !== "") {
+                    if (banner) {
+                        banner.textContent = txt;
+                        banner.classList.remove('hidden');
+                        document.body.style.paddingTop = banner.offsetHeight + 'px';
+                    }
+                } else {
+                    if (banner) {
+                        banner.classList.add('hidden');
+                        document.body.style.paddingTop = '0px';
+                    }
+                }
+                
+                // Update kolom input admin hanya jika admin tidak sedang mengetik
+                const btn = document.getElementById('update-broadcast-btn');
+                const isSaving = btn && btn.disabled;
+                if (isAdminLoggedIn && inputAdmin && document.activeElement !== inputAdmin && !isSaving) {
+                    inputAdmin.value = txt;
+                }
+            };
+
+            // Fungsi untuk logika tombol simpan di panel admin
+            const initBroadcastAdminLogic = () => {
+                const btn = document.getElementById('update-broadcast-btn');
+                const input = document.getElementById('broadcast-input');
+                
+                if (btn && input) {
+                    btn.addEventListener('click', async () => {
+                        const text = input.value.trim();
+                        const originalText = btn.textContent;
+                        
+                        // Efek Visual Loading
+                        btn.textContent = 'MENGIRIM KE SERVER...';
+                        btn.disabled = true;
+                        btn.classList.add('opacity-50');
+                        
+                        try {
+                            await db.collection('settings').doc('announcement').set({ 
+                                text: text,
+                                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                            
+                            // Efek Visual Berhasil
+                            btn.textContent = 'BERHASIL DISIMPAN!';
+                            btn.classList.replace('text-blue-400', 'text-green-400');
+                            
+                            setTimeout(() => {
+                                btn.textContent = originalText;
+                                btn.disabled = false;
+                                btn.classList.remove('opacity-50');
+                                btn.classList.replace('text-green-400', 'text-blue-400');
+                            }, 2000);
+
+                        } catch(e) { 
+                            console.error("Firebase Error:", e);
+                            alert("Gagal menyimpan. Pastikan Anda memiliki hak akses Admin."); 
+                            btn.textContent = originalText;
+                            btn.disabled = false;
+                            btn.classList.remove('opacity-50');
+                        }
+                    });
+                }
+            };
+
+            // Listener utama pengaturan yang telah diperbaiki
+            const listenForSettings = () => { 
+                db.collection('settings').onSnapshot(snap => { 
+                    snap.docs.forEach(doc => { 
+                        if (doc.id === 'stock') { 
+                            const data = doc.data();
+                            adminStockIdr = data.idr || 0; adminStockRub = data.rub || 0; 
+                            alertThresholdIdr = data.thresholdIdr || 0; alertThresholdRub = data.thresholdRub || 0;
+                            isLowStockAlertSentIdr = data.alertIdr || false; isLowStockAlertSentRub = data.alertRub || false;
+                            
+                            if(stockIdrDisplay) stockIdrDisplay.textContent = formatCurrency(adminStockIdr, 'IDR'); 
+                            if(stockRubDisplay) stockRubDisplay.textContent = `${formatNumber(adminStockRub, 2)} RUB`; 
+                            if(alertThresholdIdrDisplay) alertThresholdIdrDisplay.textContent = formatCurrency(alertThresholdIdr, 'IDR');
+                            if(alertThresholdRubDisplay) alertThresholdRubDisplay.textContent = `${formatNumber(alertThresholdRub, 2)} RUB`;
+
+                            if (isAdminLoggedIn) {
+                                if (adminStockIdr <= alertThresholdIdr && alertThresholdIdr > 0 && !isLowStockAlertSentIdr) {
+                                    sendTelegramText(`⚠️ <b>PERINGATAN STOK IDR MENIPIS!</b> ⚠️\n---------------------------\nSisa Stok: <b>${formatCurrency(adminStockIdr, 'IDR')}</b>\nBatas Peringatan: ${formatCurrency(alertThresholdIdr, 'IDR')}\n---------------------------\nSegera Top-Up IDR operasional Anda!`);
+                                    db.collection('settings').doc('stock').update({ alertIdr: true });
+                                } else if (adminStockIdr > alertThresholdIdr && isLowStockAlertSentIdr) {
+                                    db.collection('settings').doc('stock').update({ alertIdr: false });
+                                }
+
+                                if (adminStockRub <= alertThresholdRub && alertThresholdRub > 0 && !isLowStockAlertSentRub) {
+                                    sendTelegramText(`⚠️ <b>PERINGATAN STOK RUB MENIPIS!</b> ⚠️\n---------------------------\nSisa Stok: <b>${formatNumber(adminStockRub, 2)} RUB</b>\nBatas Peringatan: ${formatNumber(alertThresholdRub, 2)} RUB\n---------------------------\nSegera Top-Up RUB operasional Anda!`);
+                                    db.collection('settings').doc('stock').update({ alertRub: true });
+                                } else if (adminStockRub > alertThresholdRub && isLowStockAlertSentRub) {
+                                    db.collection('settings').doc('stock').update({ alertRub: false });
+                                }
+                            }
+                        } else if (doc.id === 'status') { 
+                            const data = doc.data();
+                            isEmergencyOffline = data.isOffline || false; isForceOnline = data.forceOnline || false; 
+                            manualOfflineToggle.className = `relative inline-flex items-center h-7 rounded-full w-12 transition-colors ${isEmergencyOffline ? 'bg-orange-600' : 'bg-zinc-800'}`;
+                            manualOfflineSwitch.className = `inline-block w-5 h-5 transform bg-white rounded-full transition-transform ml-1 ${isEmergencyOffline ? 'translate-x-5' : ''}`;
+                            forceOnlineToggle.className = `relative inline-flex items-center h-7 rounded-full w-12 transition-colors ${isForceOnline ? 'bg-green-600' : 'bg-zinc-800'}`;
+                            forceOnlineSwitch.className = `inline-block w-5 h-5 transform bg-white rounded-full transition-transform ml-1 ${isForceOnline ? 'translate-x-5' : ''}`;
+                            checkOperationalHours(); 
+                        } else if (doc.id === 'payouts') {
+                            const data = doc.data();
+                            if (data) {
+                                payoutSettings = data;
+                                if (isAdminLoggedIn) {
+                                    const safeUpdate = (id, value) => {
+                                        const el = document.getElementById(id);
+                                        if (el && document.activeElement !== el) {
+                                            el.value = value || '';
+                                        }
+                                    };
+                                    safeUpdate('payout-name-idr', payoutSettings.idr?.name);
+                                    safeUpdate('payout-bank-idr', payoutSettings.idr?.bank);
+                                    safeUpdate('payout-acc-idr', payoutSettings.idr?.acc);
+                                    safeUpdate('payout-name-rub', payoutSettings.rub?.name);
+                                    safeUpdate('payout-bank-rub', payoutSettings.rub?.bank);
+                                    safeUpdate('payout-acc-rub', payoutSettings.rub?.acc);
+                                }
+                            }
+                        } else if (doc.id === 'fees') {
+                            const data = doc.data();
+                            if (data) {
+                                serviceFees = data;
+                                if (isAdminLoggedIn) {
+                                    const safeUpdate = (id, val) => {
+                                        const el = document.getElementById(id);
+                                        if (el && document.activeElement !== el) el.value = val * 100;
+                                    };
+                                    safeUpdate('fee-small', serviceFees.small);
+                                    safeUpdate('fee-medium', serviceFees.medium);
+                                    safeUpdate('fee-large', serviceFees.large);
+                                }
+                            }
+                        } else if (doc.id === 'announcement') { 
+                            handleAnnouncementSnapshot(doc); 
+                        } else if (doc.id === 'limit') {
+                            const data = doc.data();
+                            if (data && data.limitAmount) {
+                                GLOBAL_WEEKLY_LIMIT = data.limitAmount;
+                                const currDisplay = document.getElementById('current-limit-display');
+                                const lastUpdDisplay = document.getElementById('last-limit-update');
+                                if (currDisplay) currDisplay.textContent = formatCurrency(GLOBAL_WEEKLY_LIMIT, 'IDR');
+                                if (lastUpdDisplay) {
+                                    const lastUpd = data.lastUpdated ? data.lastUpdated.toDate() : null;
+                                    lastUpdDisplay.textContent = lastUpd ? `Terakhir diubah: ${lastUpd.toLocaleDateString('id-ID')} ${lastUpd.toLocaleTimeString('id-ID')}` : 'Terakhir diubah: -';
+                                }
+                                calculateWeeklyLimit(); // Update UI Sisa Limit di layar user
+                            }
+                        }
+                    }); 
+                }); 
+            };
+
+            // Fungsi ringan khusus User untuk menghitung sisa limit mingguan
+            const calculateWeeklyLimit = () => {
+                const sW = getStartOfWeekWIB();
+                db.collection("transactions")
+                  .where("createdAt", ">=", firebase.firestore.Timestamp.fromDate(sW))
+                  .onSnapshot(snap => {
+                      let wSum = 0;
+                      snap.forEach(doc => {
+                          const tx = doc.data();
+                          // Hanya hitung transaksi yang tidak dibatalkan
+                          if (tx.status !== 'Dibatalkan') {
+                              const rate = tx.rate || currentRate.IDR_PER_RUB || 200;
+                              const v = tx.fromCurrency === 'IDR' ? (tx.fromAmount || 0) : ((tx.fromAmount || 0) * rate);
+                              wSum += v;
+                          }
+                      });
+                      weeklySpentAmount = wSum;
+                      if(limitDisplay) limitDisplay.textContent = formatCurrency(Math.max(0, GLOBAL_WEEKLY_LIMIT - weeklySpentAmount), 'IDR');
+                  }, err => {
+                      console.error("Gagal menghitung limit:", err);
+                      if(limitDisplay) limitDisplay.textContent = "Standby";
+                  });
+            };
+
+            // === SOLUSI 2: REALTIME LISTENER TANPA PENGURUTAN FIREBASE ===
+            const listenForMasterData = () => {
+                if (masterDataUnsubscribe) { masterDataUnsubscribe(); masterDataUnsubscribe = null; }
+
+                // PERBAIKAN 1: Menghapus orderBy() dari Firebase agar data yang baru dibuat (pending) langsung masuk ke Admin tanpa delay server
+                masterDataUnsubscribe = db.collection("transactions").onSnapshot((snap) => {
+                    try {
+                        const all = []; const acIds = new Set(); 
+                        
+                        let hasNewOrder = false;
+                        snap.docChanges().forEach(change => { if (change.type === 'added' && lastTxCount > 0 && isAdminLoggedIn) hasNewOrder = true; });
+                        
+                        if (hasNewOrder) playSound('newOrder');
+                        lastTxCount = snap.size; 
+                        
+                        snap.forEach(doc => {
+                            all.push({ id: doc.id, ...doc.data() }); 
+                        });
+
+                        // PERBAIKAN 2: Menyortir transaksi murni di dalam memori browser secara kilat
+                        all.sort((a, b) => {
+                            const tA = (a.createdAt && typeof a.createdAt.toMillis === 'function') ? a.createdAt.toMillis() : 0;
+                            const tB = (b.createdAt && typeof b.createdAt.toMillis === 'function') ? b.createdAt.toMillis() : 0;
+                            return tB - tA; // Mengurutkan dari yang paling baru
+                        });
+
+                        let logH = '';
+                        all.forEach(d => {
+                            try {
+                                const id = d.id, st = d.status || 'pending';
+                                if (st !== 'Selesai' && st !== 'Dibatalkan') acIds.add(id);
+                                
+                                const oS = lastTransactionStatuses.get(id); 
+                                if (isAdminLoggedIn && oS === 'Menunggu Pembayaran' && st === 'Menunggu Konfirmasi Admin') playSound('paymentConfirmed'); 
+                                lastTransactionStatuses.set(id, st);
+                                
+                                const fT = d.fromCurrency === 'IDR' ? formatCurrency(d.fromAmount || 0, 'IDR') : `${formatNumber(d.fromAmount || 0, 2)} RUB`;
+                                const tT = d.toCurrency === 'IDR' ? formatCurrency(d.toAmount || 0, 'IDR') : `${formatNumber(d.toAmount || 0, 2)} RUB`;
+                                
+                                const usH = d.userDetails ? `
+                                    <div class="mt-4 p-4 bg-white/[0.02] rounded-2xl border border-white/5">
+                                        <p class="text-[9px] text-zinc-500 uppercase font-black tracking-widest mb-1">Tujuan Transfer:</p>
+                                        <p class="text-white text-[11px] font-bold">${d.userDetails.name || '-'}</p>
+                                        <p class="text-orange-400 text-[10px] font-bold">${d.userDetails.bank || '-'}</p>
+                                        <div class="flex items-center gap-2 mt-1">
+                                            <p class="text-white font-mono text-xs tracking-wider">${d.userDetails.account || '-'}</p>
+                                            <svg class="copy-icon w-3 h-3 text-zinc-500 cursor-pointer hover:text-white" data-copy="${d.userDetails.account}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                                        </div>
+                                    </div>` : '';
+
+                                // PERBAIKAN 3: CSS Titik Merah Chat. Memisahkan kelas statis dan dinamis agar bisa dimanipulasi seketika
+                                const unreadCount = globalUnreadCounts[id] || 0;
+                                const pulseClass = unreadCount > 0 ? 'animate-pulse' : ''; 
+                                const displayStyle = unreadCount > 0 ? 'inline-flex' : 'none'; 
+                                const chB = `<button data-id="${id}" class="admin-chat-btn w-full mt-3 text-[9px] font-black uppercase bg-blue-500/10 text-blue-400 py-4 rounded-xl border border-blue-500/20 tracking-widest flex items-center justify-center gap-2 hover:bg-blue-500/20 transition">Buka Chat<span class="unread-indicator ${pulseClass} bg-red-600 text-white w-4 h-4 rounded-full items-center justify-center text-[7px] font-bold shadow-[0_0_8px_rgba(220,38,38,0.8)]" style="display: ${displayStyle};">${unreadCount > 0 ? unreadCount : ''}</span></button>`;
+                                
+                                let ctH = '';
+                                if (st === 'Selesai' || st === 'Dibatalkan') {
+                                    ctH = `<div class="mt-4 text-center text-[10px] font-black uppercase tracking-[0.2em] ${st==='Selesai'?'text-green-500':'text-red-500'}">${st}</div>`;
+                                } else if (st === 'Menunggu Pembayaran') {
+                                    ctH = `<div class="mt-4 text-center text-[9px] text-zinc-700 italic mb-3 tracking-widest uppercase font-black">Menunggu Dana</div><div class="grid grid-cols-2 gap-3"><button data-id="${id}" class="admin-cancel-button text-[9px] font-black uppercase bg-zinc-900 text-zinc-600 py-4 rounded-xl hover:bg-zinc-800 transition">Batalkan</button>${chB}</div>`;
+                                } else { 
+                                    const steps = ['Menunggu Konfirmasi Admin', 'Verifikasi Pembayaran', 'Proses Kirim', 'Selesai'];
+                                    const cIx = steps.indexOf(st); 
+                                    ctH = `<div class="flex items-center gap-1.5 mt-5">`; 
+                                    steps.forEach((s, i) => { 
+                                        const cl = i < cIx ? 'bg-green-500' : i === cIx ? 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.5)]' : 'bg-zinc-900'; 
+                                        ctH += `<div data-id="${id}" data-status="${s}" class="admin-progress-step flex-1 h-2 rounded-full ${cl} cursor-pointer transition-all duration-300 hover:opacity-80"></div>`; 
+                                    }); 
+                                    ctH += `</div><p class="text-[8px] text-zinc-700 text-center font-black mt-3 uppercase tracking-widest">${st}</p><div class="grid grid-cols-2 gap-3 mt-4"><button data-id="${id}" class="admin-cancel-button bg-zinc-900 text-zinc-700 py-4 rounded-xl text-[9px] uppercase font-black hover:bg-zinc-800 transition">Batalkan</button>${chB}</div>`; 
+                                }
+                                
+                                const timeStr = (d.createdAt && typeof d.createdAt.toDate === 'function') ? d.createdAt.toDate().toLocaleTimeString() : 'Baru Saja';
+                                logH += `<div class="bg-zinc-950/60 p-6 rounded-3xl border border-white/5 mb-5 shadow-xl transition-all duration-500 hover:border-white/10"> <div class="flex justify-between items-start"> <div> <p class="text-[8px] font-mono text-zinc-700 mb-2 uppercase tracking-[0.3em]">${id}</p> <p class="font-black text-white text-sm">${fT} → ${tT}</p> <p class="text-[8px] text-zinc-700 mt-2 uppercase tracking-widest">${timeStr}</p> </div> </div> ${usH} ${ctH} </div>`;
+                            } catch (docLoopErr) {
+                                console.error("Error pada dokumen:", docLoopErr);
+                            }
+                        });
+                        
+                        globalTransactions = all; 
+                        if (transactionLog) {
+                            transactionLog.innerHTML = logH || '<p class="text-center text-zinc-800 text-[10px] font-black py-20 uppercase tracking-widest">Belum ada transaksi</p>';
+                            transactionLog.querySelectorAll('.copy-icon').forEach(ci => { ci.onclick = (e) => { e.stopPropagation(); navigator.clipboard.writeText(ci.dataset.copy); const old = ci.innerHTML; ci.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>`; setTimeout(()=>ci.innerHTML=old,1500); }; });
+                        }
+
+                        messageListeners.forEach((un, txId) => { if (!acIds.has(txId)) { un(); messageListeners.delete(txId); delete globalUnreadCounts[txId]; } });
+
+                        acIds.forEach(id => { 
+                            if (!messageListeners.has(id)) { 
+                                const un = db.collection('transactions').doc(id).collection('messages').onSnapshot(mS => { 
+                                    try {
+                                        let unr = 0, hN = false; 
+                                        mS.docChanges().forEach(c => { if (c.type === 'added' && c.doc.data().sender === 'user' && !c.doc.data().isRead) hN = true; }); 
+                                        mS.forEach(d => { if(d.data().sender === 'user' && !d.data().isRead) unr++; }); 
+                                        
+                                        globalUnreadCounts[id] = unr; 
+                                        if (hN && isAdminLoggedIn) playSound('chatMessage'); 
+                                        
+                                        if (transactionLog) {
+                                            const btn = transactionLog.querySelector(`.admin-chat-btn[data-id="${id}"]`); 
+                                            if (btn) { 
+                                                const ind = btn.querySelector('.unread-indicator'); 
+                                                if (ind) {
+                                                    // PERBAIKAN 4: Update titik merah menggunakan atribut gaya absolut (style.display)
+                                                    if (unr > 0) { 
+                                                        ind.textContent = unr; 
+                                                        ind.style.display = 'inline-flex'; 
+                                                        ind.classList.add('animate-pulse'); 
+                                                    } else { 
+                                                        ind.style.display = 'none'; 
+                                                        ind.classList.remove('animate-pulse'); 
+                                                    } 
+                                                }
+                                            }
+                                        }
+                                    } catch (chatErr) {
+                                        console.error("Chat indikator error:", chatErr);
+                                    }
+                                }); 
+                                messageListeners.set(id, un); 
+                            } 
+                        });
+                        
+                        updateAdminDashboard(all); 
+                        let wSum = 0, sW = getStartOfWeekWIB(); 
+                        all.forEach(tx => { if (tx.createdAt && typeof tx.createdAt.toMillis === 'function' && tx.createdAt.toDate() >= sW && tx.status !== 'Dibatalkan') { const v = tx.fromCurrency === 'IDR' ? (tx.fromAmount || 0) : ((tx.fromAmount || 0) * (tx.rate || 0)); wSum += v; } });
+                        weeklySpentAmount = wSum; 
+                        if(limitDisplay) limitDisplay.textContent = formatCurrency(Math.max(0, GLOBAL_WEEKLY_LIMIT - weeklySpentAmount), 'IDR');
+
+                    } catch (renderError) {
+                        console.error("Fatal Render Error:", renderError);
+                    }
+                }, err => {
+                    console.error("Firebase Snapshot Error:", err);
+                }); 
+            };
+            
+            const listenForRate = () => {
+                db.collection('settings').doc('rate').onSnapshot(doc => {
+                    if (doc.exists && doc.data().value) {
+                        const newRate = doc.data().value;
+                        currentRate.IDR_PER_RUB = newRate;
+                        rateInfo.textContent = `KURS INDEX: 1 RUB = ${formatNumber(newRate, 2)} IDR`;
+                        if(currentRateDisplay) currentRateDisplay.textContent = `1 RUB = ${formatNumber(newRate, 2)} IDR`;
+                        if (parseFloat(fromAmountInput.value) > 0) calculateConversion();
+                    } else {
+                        rateInfo.textContent = "MENUNGGU KURS...";
+                        if(currentRateDisplay) currentRateDisplay.textContent = "Belum diatur";
+                    }
+                });
+            };
+            
+            const listenForRatings = () => { db.collection('settings').doc('ratings').onSnapshot(doc => { if (!doc.exists) { ratingDisplay.innerHTML = `Skor Kepercayaan: -`; return; } const d = doc.data(), c = d.ratingCount || 0; if (c === 0) { ratingDisplay.innerHTML = `Skor Kepercayaan: -`; return; } const av = (d.totalRatingSum / c).toFixed(1); ratingDisplay.innerHTML = `<span class="text-orange-500 mr-1.5 italic font-black">★</span>${av} Score (${c})`; }); };
+            
+            // === SOLUSI 3: RATING AMAN BENTROK FIREBASE ===
+            const submitRating = async (txId, val) => { 
+                const rR = db.collection('settings').doc('ratings'), tR = db.collection('transactions').doc(txId); 
+                try { 
+                    await tR.update({ rating: val }); 
+                    const rD = await rR.get();
+                    const newSum = (rD.exists ? rD.data().totalRatingSum : 0) + val;
+                    const newCount = (rD.exists ? rD.data().ratingCount : 0) + 1;
+                    await rR.set({ totalRatingSum: newSum, ratingCount: newCount }, { merge: true });
+                    
+                    renderRatingStars(completedRatingStars, val, false); 
+                    ratingThanks.classList.remove('hidden'); 
+                } catch (e) {
+                    renderRatingStars(completedRatingStars, val, false); 
+                    ratingThanks.textContent = "Terima kasih atas ulasan Anda!";
+                    ratingThanks.classList.remove('hidden'); 
+                } 
+            };
+            
+            const populateBankSelect = () => { userBankSelect.innerHTML = '<option value="">Pilih Bank Tujuan...</option>'; const bs = (conversionMode === 'IDR_TO_RUB') ? bankLists.rusia : bankLists.indonesia; bs.forEach(b => { const o = document.createElement('option'); o.value = b.value; o.textContent = b.text; userBankSelect.appendChild(o); }); };
+            
+            const startAdminHeartbeat = () => { 
+                if (adminHeartbeatInterval) clearInterval(adminHeartbeatInterval); 
+                const u = () => { if (document.visibilityState === 'visible') { db.collection('settings').doc('adminPresence').set({ lastSeen: firebase.firestore.FieldValue.serverTimestamp() }); } }; 
+                u(); adminHeartbeatInterval = setInterval(u, 30000); 
+            };
+            
+            const listenForAdminStatus = () => {
+                const uD = () => {
+                    let isOnline = false;
+                    if (lastAdminSeenTimestamp) {
+                        const df = Math.abs((new Date().getTime() - lastAdminSeenTimestamp.getTime()) / 1000);
+                        if (df < 60) isOnline = true; 
+                    }
+                    if (isOnline) {
+                        adminStatusIndicator.className = "flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 shadow-[0_0_10px_rgba(34,197,94,0.2)] transition-all duration-300";
+                        adminStatusIndicator.innerHTML = `<span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span></span><span class="text-[10px] font-black text-green-400 uppercase tracking-wider">Admin Online</span>`;
+                    } else {
+                        adminStatusIndicator.className = "flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-800/50 border border-white/5 transition-all duration-300";
+                        adminStatusIndicator.innerHTML = `<span class="flex h-2 w-2 rounded-full bg-zinc-600"></span><span class="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Offline</span>`;
+                    }
+                };
+                db.collection('settings').doc('adminPresence').onSnapshot(doc => { if (doc.exists && doc.data().lastSeen) lastAdminSeenTimestamp = doc.data().lastSeen.toDate(); else lastAdminSeenTimestamp = null; uD(); });
+                setInterval(uD, 30000);
+            };
+
+            userHistoryLog.addEventListener('click', async (e) => { 
+                const ci = e.target.closest('.copy-icon'); if (ci) { navigator.clipboard.writeText(ci.dataset.copy); const o = ci.innerHTML; ci.innerHTML = `<path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M5 13l4 4L19 7\"></path>`; setTimeout(()=>ci.innerHTML=o,1500); return; }
+                const b = e.target, id = b.dataset.id; if (!id) return; 
+                
+                if (b.id === 'cancel-button') confirmationModal.classList.remove('hidden'); 
+                else if (b.id === 'confirm-payment-button') { 
+                    b.disabled = true; b.textContent = 'Memproses...'; 
+                    const alertMsg = `🚨 <b>USER SUDAH TRANSFER!</b> 🚨\n\nTransaksi ID: <code>${id}</code>\nStatus: <b>Menunggu Konfirmasi Admin</b>\n\nUser telah menekan tombol konfirmasi. Silakan buka mutasi Rekening/Bank Anda SEKARANG untuk memverifikasi dana masuk!`;
+                    await sendTelegramText(alertMsg);
+                    db.collection('transactions').doc(id).update({ status: 'Menunggu Konfirmasi Admin', paymentConfirmedAt: firebase.firestore.FieldValue.serverTimestamp() }); 
+                }
+            });
+            
+            transactionLog.addEventListener('click', async (e) => { 
+                const pb = e.target.closest('.admin-progress-step'); 
+                if (pb) { 
+                    const txId = pb.dataset.id;
+                    const newStatus = pb.dataset.status;
+                    
+                    if (newStatus === 'Selesai') {
+                        const oldBg = pb.className;
+                        pb.classList.remove('bg-zinc-900', 'bg-green-500', 'bg-orange-500');
+                        pb.classList.add('bg-blue-500', 'animate-pulse');
+                        
+                        try {
+                            await db.collection('transactions').doc(txId).update({ status: newStatus });
+                            db.collection('transactions').doc(txId).get().then(async (doc) => {
+                                if (doc.exists) {
+                                    const d = doc.data();
+                                    const profit = d.feeIdr || 0;
+                                    const userName = d.userDetails ? d.userDetails.name : 'Pelanggan';
+                                    const payoutAmount = d.toAmount;
+
+                                    const stockRef = db.collection('settings').doc('stock');
+                                    if (d.toCurrency === 'RUB') {
+                                        await stockRef.set({ rub: firebase.firestore.FieldValue.increment(-payoutAmount) }, { merge: true });
+                                    } else if (d.toCurrency === 'IDR') {
+                                        await stockRef.set({ idr: firebase.firestore.FieldValue.increment(-payoutAmount) }, { merge: true });
+                                    }
+
+                                    const msg = `✅ <b>TRANSAKSI SELESAI</b> ✅\n---------------------------\n👤 User: ${escapeHTML(userName)}\n🆔 ID: <code>${txId}</code>\n\n💰 Profit Estimasi: <b>${formatCurrency(profit, 'IDR')}</b>\n---------------------------\nKerja bagus tim! 🚀`;
+                                    sendTelegramText(msg);
+                                }
+                            }).catch(errBg => console.error(errBg));
+
+                        } catch(err) {
+                            pb.className = oldBg;
+                            alert("Akses Ditolak: Hanya Admin yang bisa menyelesaikan transaksi.");
+                        }
+                    } else {
+                        db.collection('transactions').doc(txId).update({ status: newStatus }).catch(() => alert("Akses Ditolak")); 
+                    }
+                    return; 
+                }
+                const cb = e.target.closest('.admin-cancel-button'); if (cb) { adminCancelTxId = cb.dataset.id; cancellationReasonInput.value = ''; adminCancelModal.classList.remove('hidden'); }
+                const chb = e.target.closest('.admin-chat-btn'); if (chb) { adminChatTxId = chb.dataset.id; adminChatTxIdEl.textContent = adminChatTxId.substring(0,10)+'...'; adminChatModal.classList.remove('hidden'); initChat(adminChatTxId, '#admin-chat-messages', '#admin-chat-form', '#admin-chat-input', 'admin'); db.collection('transactions').doc(adminChatTxId).collection('messages').where('sender','==user').where('isRead','==',false).get().then(s => { const batch = db.batch(); s.forEach(d => batch.update(d.ref, {isRead:true})); batch.commit(); }); }
+            });
+            
+            closeChatModalBtn.addEventListener('click', () => { adminChatModal.classList.add('hidden'); if (activeChatListener) activeChatListener(); adminChatTxId = null; });
+            lockButton.addEventListener('click', () => { if (lastLockedTransaction) { const iI = lastLockedTransaction.fromCurrency === 'IDR'; confirmationAmountEl.textContent = iI ? formatCurrency(lastLockedTransaction.fromAmount, 'IDR') : `${formatNumber(lastLockedTransaction.fromAmount, 2)} RUB`; confirmationModal.classList.remove('hidden'); } });
+            confirmOrderBtn.addEventListener('click', () => { confirmationModal.classList.add('hidden'); lockTransaction(); });
+            cancelOrderBtn.addEventListener('click', () => { confirmationModal.classList.add('hidden'); });
+            
+            confirmAdminCancelBtn.addEventListener('click', async () => { 
+                const r = cancellationReasonInput.value.trim(); 
+                if (r && adminCancelTxId) { 
+                    const btn = confirmAdminCancelBtn;
+                    const originalText = btn.textContent;
+                    btn.textContent = 'Memproses...';
+                    btn.disabled = true;
+                    try {
+                        const docRef = db.collection('transactions').doc(adminCancelTxId);
+                        const doc = await docRef.get();
+                        if (doc.exists && doc.data().status !== 'Dibatalkan') {
+                            const d = doc.data();
+                            const userName = d.userDetails ? d.userDetails.name : 'Pelanggan';
+                            const msg = `❌ <b>TRANSAKSI DIBATALKAN</b> ❌\n---------------------------\n👤 User: ${escapeHTML(userName)}\n🆔 ID: <code>${adminCancelTxId}</code>\n\n⚠️ Alasan: <i>${escapeHTML(r)}</i>\n---------------------------`;
+                            await sendTelegramText(msg);
+                        }
+                        await docRef.update({ status: 'Dibatalkan', cancellationReason: r }); 
+                        adminCancelModal.classList.add('hidden'); 
+                    } catch (err) { alert("Akses Ditolak!"); } finally { btn.textContent = originalText; btn.disabled = false; }
+                } 
+            });
+            
+            cancelAdminCancelBtn.addEventListener('click', () => adminCancelModal.classList.add('hidden'));
+            fromAmountInput.addEventListener('input', () => { let v = fromAmountInput.value.replace(/[^0-9]/g, ''); fromAmountInput.value = v ? parseInt(v, 10).toLocaleString('id-ID') : ''; calculateConversion(); });
+            [userNameInput, userBankSelect, userAccountInput].forEach(el => el.addEventListener('input', validateUserDetails));
+            if(fz161Agree) fz161Agree.addEventListener('change', validateUserDetails);
+            newTransactionButton.addEventListener('click', resetToConverterScreen);
+            const viewReceiptBtn = document.getElementById('view-receipt-btn');
+            const receiptModal = document.getElementById('receipt-modal');
+            const closeReceiptBtn = document.getElementById('close-receipt-btn');
+
+            if (viewReceiptBtn) {
+                viewReceiptBtn.addEventListener('click', () => {
+                    if (!lastCompletedTxData) return;
+                    const d = lastCompletedTxData;
+                    const isI2R = d.fromCurrency === 'IDR';
+                    
+                    const dateObj = (d.createdAt && typeof d.createdAt.toDate === 'function') ? d.createdAt.toDate() : new Date();
+                    document.getElementById('receipt-date').textContent = dateObj.toLocaleDateString('id-ID') + ' ' + dateObj.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+                    document.getElementById('receipt-id').textContent = d.id;
+                    document.getElementById('receipt-recipient').textContent = d.userDetails ? d.userDetails.name : '-';
+                    document.getElementById('receipt-bank').textContent = d.userDetails ? d.userDetails.bank : '-';
+                    
+                    document.getElementById('receipt-paid').textContent = isI2R ? formatCurrency(d.fromAmount, 'IDR') : `${formatNumber(d.fromAmount, 2)} RUB`;
+                    document.getElementById('receipt-received').textContent = isI2R ? `${formatNumber(d.toAmount, 2)} RUB` : formatCurrency(d.toAmount, 'IDR');
+                    document.getElementById('receipt-rate').textContent = `1 RUB = ${formatNumber(d.rate || currentRate.IDR_PER_RUB || 200, 0)} IDR`;
+                    
+                    receiptModal.classList.remove('hidden');
+                });
+            }
+
+            if (closeReceiptBtn) {
+                closeReceiptBtn.addEventListener('click', () => receiptModal.classList.add('hidden'));
+            }
+        const renderQuickChips = () => {
+                const container = $('#quick-chips-container') || document.getElementById('quick-amount-chips');
+                if (!container) return;
+                container.innerHTML = '';
+                const isI2R = conversionMode === 'IDR_TO_RUB';
+                const chips = isI2R 
+                    ? [{l: '+100rb', v: 100000}, {l: '+500rb', v: 500000}, {l: '+1 Jt', v: 1000000}, {l: '+5 Jt', v: 5000000}]
+                    : [{l: '+1.000', v: 1000}, {l: '+5.000', v: 5000}, {l: '+10.000', v: 10000}, {l: '+50.000', v: 50000}];
+                
+                chips.forEach(c => {
+                    const btn = document.createElement('button');
+                    btn.className = 'quick-chip';
+                    btn.textContent = c.l;
+                    btn.onclick = () => {
+                        const currentVal = parseInt(fromAmountInput.value.replace(/[^0-9]/g, '')) || 0;
+                        const newVal = currentVal + c.v;
+                        fromAmountInput.value = newVal.toLocaleString('id-ID');
+                        calculateConversion();
+                    };
+                    container.appendChild(btn);
+                });
+            };
+            swapButton.addEventListener('click', () => { 
+                conversionMode = (conversionMode === 'IDR_TO_RUB') ? 'RUB_TO_IDR' : 'IDR_TO_RUB'; const iI = conversionMode === 'IDR_TO_RUB';
+                isSwapped = !isSwapped; swapButton.style.transform = isSwapped ? 'rotate(180deg) scale(1.1)' : 'rotate(0deg) scale(1.1)'; fromCurrencyLabel.textContent = iI ? 'IDR' : 'RUB'; toCurrencyLabel.textContent = iI ? 'RUB' : 'IDR'; 
+                userAccountLabel.textContent = iI ? 'Nomor Kartu (RU)' : 'Nomor Rekening (ID)'; userAccountInput.placeholder = iI ? '4276...' : '1234...'; populateBankSelect(); renderQuickChips(); resetUI(); 
+            });
+            
+            loginSubmit.addEventListener('click', async () => { 
+                const email = loginEmailInput.value.trim(), password = loginPasswordInput.value;
+                if (!email || !password) { loginError.textContent = "Email dan Password wajib diisi"; loginError.classList.remove('hidden'); return; }
+                loginSubmit.textContent = "MENGHUBUNGKAN..."; loginSubmit.disabled = true;
+                try { await auth.signInWithEmailAndPassword(email, password); } catch (error) { loginError.textContent = "Kredensial Salah atau Tidak Terdaftar"; loginError.classList.remove('hidden'); loginPasswordInput.value = ''; loginSubmit.textContent = "Autentikasi Server"; loginSubmit.disabled = false; }
+            });
+
+            logoutBtn.addEventListener('click', async () => {
+                if (isAdminLoggedIn) { await db.collection('settings').doc('adminPresence').set({ lastSeen: null }); }
+                auth.signOut().then(() => { window.location.reload(); });
+            });
+
+            auth.onAuthStateChanged(user => {
+                const gridLayout = document.getElementById('admin-grid-layout');
+                if (user) {
+                    isAdminLoggedIn = true; 
+                    pinForm.style.display = 'none'; // Tutup form login
+                    adminDashboard.style.display = 'block'; // Buka dashboard
+                    transactionLogContainer.style.display = 'block'; // Buka log
+                    logoutBtn.classList.remove('hidden');
+                    if(gridLayout) { 
+                        gridLayout.style.display = ''; // Biarkan sistem Grid jalan
+                        gridLayout.classList.add('lg:grid'); 
+                    }
+                    startAdminHeartbeat(); listenForMasterData();
+                } else {
+                    isAdminLoggedIn = false; 
+                    pinForm.style.display = 'block'; // Buka form login
+                    adminDashboard.style.display = 'none'; // Tutup dashboard paksa
+                    transactionLogContainer.style.display = 'none'; // Tutup log paksa
+                    logoutBtn.classList.add('hidden');
+                    if(gridLayout) { 
+                        gridLayout.style.display = 'none'; // Tutup bungkus Grid paksa
+                        gridLayout.classList.remove('lg:grid'); 
+                    }
+                    if (adminHeartbeatInterval) clearInterval(adminHeartbeatInterval);
+                    if (masterDataUnsubscribe) { masterDataUnsubscribe(); masterDataUnsubscribe = null; } 
+                }
+            });
+            
+            document.getElementById('update-limit-btn').addEventListener('click', async () => {
+                const limitInput = document.getElementById('update-limit-input');
+                const newVal = parseFloat(limitInput.value);
+                if (isNaN(newVal) || newVal <= 0) { alert("Masukkan angka limit yang valid!"); return; }
+                
+                const btn = document.getElementById('update-limit-btn');
+                const originalText = btn.textContent;
+                btn.textContent = 'MEMPROSES...'; btn.disabled = true;
+                
+                try {
+                    const limitDoc = await db.collection('settings').doc('limit').get();
+                    const sW = getStartOfWeekWIB(); // Dapatkan waktu Senin jam 00:00 minggu ini
+                    
+                    // Cek apakah sudah pernah diubah sejak hari Senin minggu ini
+                    if (limitDoc.exists && limitDoc.data().lastUpdated) {
+                        const lastUpd = limitDoc.data().lastUpdated.toDate();
+                        if (lastUpd >= sW) {
+                            alert("⚠️ Batas Limit sudah diubah minggu ini!\nAnda baru bisa mengubahnya lagi pada hari Senin minggu depan.");
+                            btn.textContent = originalText; btn.disabled = false;
+                            return;
+                        }
+                    }
+                    
+                    // Jika lolos pengecekan, simpan limit baru ke Firebase
+                    await db.collection('settings').doc('limit').set({
+                        limitAmount: newVal,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    limitInput.value = '';
+                    alert('Limit mingguan berhasil diperbarui!');
+                } catch(e) {
+                    console.error(e);
+                    alert("Akses Ditolak atau Terjadi Kesalahan Server!");
+                } finally {
+                    btn.textContent = originalText; btn.disabled = false;
+                }
+            });
+            updateRateButton.addEventListener('click', async () => { const r = parseFloat(manualRateInput.value); 
+    if (r > 0) { 
+        try { 
+            await db.collection('settings').doc('rate').set({ value: r }, { merge: true }); 
+            manualRateInput.value = ''; 
+            alert('Kurs berhasil diupdate untuk semua user!'); 
+        } catch(e) { alert("Akses Ditolak!"); } 
+    } 
+});
+            document.getElementById('update-fees-btn').addEventListener('click', async () => {
+    const data = {
+        small: parseFloat(document.getElementById('fee-small').value) / 100,
+        medium: parseFloat(document.getElementById('fee-medium').value) / 100,
+        large: parseFloat(document.getElementById('fee-large').value) / 100
+    };
+    
+    if (isNaN(data.small) || isNaN(data.medium) || isNaN(data.large)) {
+        alert("Harap masukkan angka yang valid untuk semua kategori biaya.");
+        return;
+    }
+
+    try {
+        await db.collection('settings').doc('fees').set(data);
+        alert('Biaya Layanan Berhasil Diperbarui!');
+    } catch(e) { alert("Akses Ditolak!"); }
+});
+            document.getElementById('update-payout-btn').addEventListener('click', async () => {
+    const data = {
+        idr: { 
+            name: document.getElementById('payout-name-idr').value.trim(), 
+            bank: document.getElementById('payout-bank-idr').value.trim(), 
+            acc: document.getElementById('payout-acc-idr').value.trim() 
+        },
+        rub: { 
+            name: document.getElementById('payout-name-rub').value.trim(), 
+            bank: document.getElementById('payout-bank-rub').value.trim(), 
+            acc: document.getElementById('payout-acc-rub').value.trim() 
+        }
+    };
+    try {
+        await db.collection('settings').doc('payouts').set(data);
+        alert('Rekening Berhasil Diperbarui!');
+    } catch(e) { 
+        alert("Gagal memperbarui rekening. Pastikan Anda login sebagai admin."); 
+    }
+});
+            addStockIdrBtn.addEventListener('click', async () => { const a = parseFloat(addStockIdrInput.value); if (a > 0) { try { await db.collection('settings').doc('stock').set({ idr: firebase.firestore.FieldValue.increment(a) }, { merge: true }); addStockIdrInput.value = ''; } catch(e) { alert("Akses Ditolak!"); } } });
+            addStockRubBtn.addEventListener('click', async () => { const a = parseFloat(addStockRubInput.value); if (a > 0) { try { await db.collection('settings').doc('stock').set({ rub: firebase.firestore.FieldValue.increment(a) }, { merge: true }); addStockRubInput.value = ''; } catch(e) { alert("Akses Ditolak!"); } } });
+            updateThresholdIdrBtn.addEventListener('click', async () => { const t = parseFloat(alertThresholdIdrInput.value); if (t >= 0) { await db.collection('settings').doc('stock').set({ thresholdIdr: t, alertIdr: false }, { merge: true }); alertThresholdIdrInput.value = ''; alert('Batas peringatan stok IDR berhasil diperbarui!'); } });
+            updateThresholdRubBtn.addEventListener('click', async () => { const t = parseFloat(alertThresholdRubInput.value); if (t >= 0) { await db.collection('settings').doc('stock').set({ thresholdRub: t, alertRub: false }, { merge: true }); alertThresholdRubInput.value = ''; alert('Batas peringatan stok RUB berhasil diperbarui!'); } });
+
+            completedRatingStars.addEventListener('click', (e) => { 
+                const s = e.target.closest('svg'); 
+                if (s && completedRatingStars.classList.contains('rating-stars')) {
+                    const val = parseInt(s.dataset.value);
+                    submitRating(completedTxId.textContent, val); 
+                }
+            });
+            
+            manualOfflineToggle.addEventListener('click', () => { db.collection('settings').doc('status').set({ isOffline: !isEmergencyOffline }, { merge: true }).catch(()=>alert("Akses Ditolak!")); });
+            forceOnlineToggle.addEventListener('click', () => { db.collection('settings').doc('status').set({ forceOnline: !isForceOnline }, { merge: true }).catch(()=>alert("Akses Ditolak!")); });
+            testTelegramBtn.addEventListener('click', sendTelegramTest);
+
+            sendWeeklyReportBtn.addEventListener('click', async () => {
+                sendWeeklyReportBtn.textContent = 'MENGHITUNG...'; sendWeeklyReportBtn.disabled = true;
+                try {
+                    const sW = getStartOfWeekWIB(); let count = 0, volIdr = 0, volRub = 0, profitIdr = 0, profitRub = 0;
+                    globalTransactions.forEach(tx => {
+                        if (tx.createdAt && tx.createdAt.toDate() >= sW && tx.status === 'Selesai') {
+                            count++;
+                            if (tx.fromCurrency === 'IDR') { volIdr += tx.fromAmount; profitRub += (tx.feeRub || 0); } else { volRub += tx.fromAmount; profitIdr += (tx.feeIdr || 0); }
+                        }
+                    });
+                    const totalProfitIdr = profitIdr + (profitRub * currentRate.IDR_PER_RUB);
+                    const msg = `📊 <b>REKAP MINGGUAN RUBELINDO</b> 📊\n<i>Periode: Sejak Senin minggu ini</i>\n\n✅ <b>Selesai:</b> ${count} Transaksi\n🔄 <b>Volume Masuk IDR:</b> ${formatCurrency(volIdr, 'IDR')}\n🔄 <b>Volume Masuk RUB:</b> ${formatNumber(volRub, 2)} RUB\n\n💰 <b>Estimasi Profit:</b> ${formatCurrency(totalProfitIdr, 'IDR')}\n---------------------------\n<i>Semangat terus tim!</i> 💪`;
+                    await sendTelegramText(msg);
+                    sendWeeklyReportBtn.textContent = 'TERKIRIM!'; sendWeeklyReportBtn.classList.replace('text-purple-400', 'text-green-400'); sendWeeklyReportBtn.classList.replace('border-purple-600/20', 'border-green-600/20');
+                    setTimeout(() => { sendWeeklyReportBtn.textContent = 'KIRIM LAPORAN'; sendWeeklyReportBtn.classList.replace('text-green-400', 'text-purple-400'); sendWeeklyReportBtn.classList.replace('border-green-600/20', 'border-purple-600/20'); sendWeeklyReportBtn.disabled = false; }, 3000);
+                } catch (e) { alert('Gagal mengirim laporan'); sendWeeklyReportBtn.textContent = 'KIRIM LAPORAN'; sendWeeklyReportBtn.disabled = false; }
+            });
+
+            [ 
+                {t: '#how-to-use-toggle', c: '#how-to-use-content', i: '#how-to-use-icon'}, 
+                {t: '#faq-toggle', c: '#faq-content', i: '#faq-icon'},
+                {t: '#tnc-toggle', c: '#tnc-content', i: '#tnc-icon'},
+                {t: '#privacy-toggle', c: '#privacy-content', i: '#privacy-icon'}
+            ].forEach(acc => {
+                $(acc.t).addEventListener('click', () => { $(acc.i).classList.toggle('rotate-180'); const content = $(acc.c); content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + "px"; });
+            });
+
+            document.body.addEventListener('click', initAudioContext, { once: true });
+            const isAdmUrl = new URLSearchParams(window.location.search).get('admin') === 'true';
+            
+            if (isAdmUrl) { 
+                userViewWrapper.classList.add('hidden'); $('#admin-panel').classList.remove('hidden'); 
+            } else if (localStorage.getItem('activeTransaction')) {
+                displayUserHistory(); calculateWeeklyLimit(); // Ganti dari listenForMasterData ke fungsi baru
+            } else {
+                showWelcomePopup(); calculateWeeklyLimit(); // Ganti dari listenForMasterData ke fungsi baru
+            }
+            
+            populateBankSelect(); renderQuickChips(); checkOperationalHours(); setInterval(checkOperationalHours, 60000);
+            initBroadcastAdminLogic(); listenForSettings(); listenForRate(); listenForRatings(); listenForAdminStatus();
+        });
+    </script>
+</body>
+</html>
