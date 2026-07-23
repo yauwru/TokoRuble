@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>TokoRuble Kios — Ambil Antrian</title>
+    <meta name="theme-color" content="#09090b">
+    <meta name="robots" content="noindex, nofollow">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-primary: #f97316;
+            --brand-secondary: #ea580c;
+            --bg-dark: #09090b;
+            --glass-bg: rgba(15, 15, 18, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(249, 115, 22, 0.08) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #f4f4f5;
+        }
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+            border-radius: 2rem;
+        }
+        .input-glass {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.25rem;
+            transition: all 0.3s ease;
+        }
+        .input-glass:focus-within, .input-glass:focus {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: var(--brand-primary);
+            box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.1);
+        }
+        .primary-btn {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            box-shadow: 0 10px 25px -10px rgba(249, 115, 22, 0.6);
+            transition: all 0.2s ease;
+        }
+        .primary-btn:active:not(:disabled) { transform: scale(0.98); }
+        .primary-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .service-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1.75rem;
+            transition: all 0.2s ease;
+        }
+        .service-card:active { transform: scale(0.98); background: rgba(249, 115, 22, 0.1); border-color: rgba(249, 115, 22, 0.4); }
+        .fade-in { animation: fadeIn 0.35s ease both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .pulse-dot { animation: pulse 1.5s ease-in-out infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md mx-auto py-6">
+
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-black tracking-tight text-white">TokoRuble <span class="text-orange-500">Kios</span></h1>
+            <p class="text-zinc-500 text-xs uppercase tracking-[0.2em] font-bold mt-1">Ambil Nomor Antrian</p>
+        </div>
+
+        <!-- SCREEN 1: PILIH LAYANAN -->
+        <div id="screen-select" class="glass-card p-6 fade-in">
+            <p class="text-center text-zinc-300 text-sm font-semibold mb-5">Pilih layanan yang Anda butuhkan</p>
+            <div class="space-y-4">
+                <button data-type="rub_to_idr" class="service-btn service-card w-full text-left p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-orange-500/10 border border-orange-500/30 flex items-center justify-center text-2xl shrink-0">🇷🇺➡️</div>
+                    <div>
+                        <p class="font-black text-white text-sm">Transfer Rubel, Terima Rupiah</p>
+                        <p class="text-zinc-500 text-xs mt-0.5">Kirim RUB ke rekening kami, ambil cash IDR</p>
+                    </div>
+                </button>
+                <button data-type="idr_to_rub" class="service-btn service-card w-full text-left p-5 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-2xl shrink-0">➡️🇷🇺</div>
+                    <div>
+                        <p class="font-black text-white text-sm">Bayar Rupiah Cash, Terima Rubel</p>
+                        <p class="text-zinc-500 text-xs mt-0.5">Bayar IDR cash, RUB kami kirim ke rekening Anda</p>
+                    </div>
+                </button>
+            </div>
+            <p id="rate-preview" class="text-center text-zinc-600 text-[11px] mt-5 font-mono"></p>
+        </div>
+
+        <!-- SCREEN 2: FORM -->
+        <div id="screen-form" class="glass-card p-6 fade-in hidden">
+            <button id="back-btn" type="button" class="text-zinc-500 text-xs font-bold mb-4 flex items-center gap-1">&larr; Kembali</button>
+            <h2 id="form-title" class="font-black text-white text-lg mb-1"></h2>
+            <p id="form-subtitle" class="text-zinc-500 text-xs mb-5"></p>
+
+            <div id="shop-bank-info" class="hidden bg-orange-500/10 border border-orange-500/30 rounded-2xl p-4 mb-5">
+                <p class="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-2">Transfer Rubel Ke Rekening Kami</p>
+                <p class="text-white text-sm font-bold" id="shop-bank-name">-</p>
+                <p class="text-zinc-300 text-sm font-mono" id="shop-bank-account">-</p>
+                <p class="text-zinc-400 text-xs" id="shop-bank-holder">-</p>
+            </div>
+
+            <form id="ticket-form" class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1" id="amount-label">Jumlah</label>
+                    <div class="input-glass flex items-center px-4 mt-1">
+                        <input type="number" inputmode="decimal" id="amount-input" required min="0" step="any" class="w-full bg-transparent py-3.5 text-white font-bold outline-none placeholder-zinc-600" placeholder="0">
+                        <span id="amount-currency" class="text-zinc-500 text-xs font-black">RUB</span>
+                    </div>
+                    <p id="estimate-text" class="text-[11px] text-zinc-500 mt-1.5 ml-1">Estimasi: -</p>
+                </div>
+
+                <div id="bank-account-field" class="hidden">
+                    <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Nomor Rekening/Kartu Bank Rusia Anda</label>
+                    <div class="input-glass px-4 mt-1">
+                        <input type="text" id="customer-bank-input" class="w-full bg-transparent py-3.5 text-white font-bold outline-none placeholder-zinc-600" placeholder="4276 xxxx xxxx xxxx">
+                    </div>
+                </div>
+
+                <div id="transfer-note-field" class="hidden">
+                    <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Catatan Transfer (Opsional)</label>
+                    <div class="input-glass px-4 mt-1">
+                        <input type="text" id="transfer-note-input" class="w-full bg-transparent py-3.5 text-white font-bold outline-none placeholder-zinc-600" placeholder="4 digit akhir kartu / no. referensi">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Nama Lengkap</label>
+                    <div class="input-glass px-4 mt-1">
+                        <input type="text" id="name-input" required class="w-full bg-transparent py-3.5 text-white font-bold outline-none placeholder-zinc-600" placeholder="Nama Anda">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">No. HP / WhatsApp</label>
+                    <div class="input-glass px-4 mt-1">
+                        <input type="tel" id="phone-input" required class="w-full bg-transparent py-3.5 text-white font-bold outline-none placeholder-zinc-600" placeholder="08xxxxxxxxxx">
+                    </div>
+                </div>
+
+                <p id="form-error" class="text-red-400 text-xs font-bold text-center hidden"></p>
+
+                <button type="submit" id="submit-btn" class="primary-btn w-full text-white font-black py-4 rounded-2xl text-xs uppercase tracking-[0.2em]">Ambil Nomor Antrian</button>
+            </form>
+        </div>
+
+        <!-- SCREEN 3: TIKET -->
+        <div id="screen-ticket" class="glass-card p-6 fade-in hidden text-center">
+            <p class="text-zinc-500 text-[10px] font-black uppercase tracking-[0.3em] mb-2">Nomor Antrian Anda</p>
+            <p id="ticket-number" class="text-6xl font-black text-orange-500 tracking-tight mb-4">-</p>
+
+            <div id="status-badge" class="inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-black uppercase tracking-widest mb-6">
+                <span class="w-2 h-2 rounded-full pulse-dot bg-current"></span>
+                <span id="status-text">Menunggu</span>
+            </div>
+
+            <div class="bg-white/[0.03] border border-white/5 rounded-2xl p-5 text-left space-y-3 mb-6">
+                <div class="flex justify-between text-xs"><span class="text-zinc-500">Layanan</span><span id="ticket-type" class="text-white font-bold"></span></div>
+                <div class="flex justify-between text-xs"><span class="text-zinc-500">Jumlah</span><span id="ticket-amount" class="text-white font-bold"></span></div>
+                <div class="flex justify-between text-xs"><span class="text-zinc-500">Estimasi Diterima</span><span id="ticket-result" class="text-green-400 font-black"></span></div>
+                <div class="flex justify-between text-xs"><span class="text-zinc-500">Kurs</span><span id="ticket-rate" class="text-zinc-400 font-mono text-[11px]"></span></div>
+            </div>
+
+            <p id="ticket-hint" class="text-zinc-400 text-xs leading-relaxed mb-6">Silakan tunggu, staf kami akan memanggil nomor Anda.</p>
+
+            <button id="new-ticket-btn" class="hidden w-full bg-white/5 border border-white/10 text-white font-black py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em]">Ambil Antrian Baru</button>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const $ = (id) => document.getElementById(id);
+            const screenSelect = $('screen-select'), screenForm = $('screen-form'), screenTicket = $('screen-ticket');
+            const formTitle = $('form-title'), formSubtitle = $('form-subtitle');
+            const amountInput = $('amount-input'), amountLabel = $('amount-label'), amountCurrency = $('amount-currency');
+            const estimateText = $('estimate-text');
+            const bankAccountField = $('bank-account-field'), customerBankInput = $('customer-bank-input');
+            const transferNoteField = $('transfer-note-field'), transferNoteInput = $('transfer-note-input');
+            const shopBankInfo = $('shop-bank-info'), shopBankName = $('shop-bank-name'), shopBankAccount = $('shop-bank-account'), shopBankHolder = $('shop-bank-holder');
+            const nameInput = $('name-input'), phoneInput = $('phone-input');
+            const ticketForm = $('ticket-form'), submitBtn = $('submit-btn'), formError = $('form-error');
+            const ratePreview = $('rate-preview');
+
+            let currentRate = 200;
+            let selectedType = null;
+            let ticketPollTimer = null;
+            let settingsPollTimer = null;
+
+            const formatIDR = (v) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(v || 0);
+            const formatNum = (v, d = 2) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v || 0);
+
+            const fetchSettings = async () => {
+                try {
+                    const res = await fetch('/api/settings');
+                    if (!res.ok) return;
+                    const s = await res.json();
+                    currentRate = s.rate || 200;
+                    ratePreview.textContent = `Kurs saat ini: 1 RUB = ${formatNum(currentRate, 2)} IDR`;
+                    shopBankName.textContent = s.bankName || '-';
+                    shopBankAccount.textContent = s.accountNumber || '-';
+                    shopBankHolder.textContent = s.accountHolder ? `a.n. ${s.accountHolder}` : '';
+                    updateEstimate();
+                } catch (e) { /* polling berikutnya akan coba lagi */ }
+            };
+
+            const updateEstimate = () => {
+                const amt = parseFloat(amountInput.value) || 0;
+                if (!amt) { estimateText.textContent = 'Estimasi: -'; return; }
+                if (selectedType === 'rub_to_idr') {
+                    estimateText.textContent = `Estimasi diterima: ${formatIDR(amt * currentRate)}`;
+                } else {
+                    estimateText.textContent = `Estimasi diterima: ${formatNum(amt / currentRate, 2)} RUB`;
+                }
+            };
+            amountInput.addEventListener('input', updateEstimate);
+
+            const showScreen = (el) => {
+                [screenSelect, screenForm, screenTicket].forEach((s) => s.classList.add('hidden'));
+                el.classList.remove('hidden');
+            };
+
+            document.querySelectorAll('.service-btn').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    selectedType = btn.dataset.type;
+                    ticketForm.reset();
+                    formError.classList.add('hidden');
+                    if (selectedType === 'rub_to_idr') {
+                        formTitle.textContent = 'Transfer Rubel, Terima Rupiah';
+                        formSubtitle.textContent = 'Transfer RUB ke rekening kami, ambil cash IDR di kasir';
+                        amountLabel.textContent = 'Jumlah Rubel Ditransfer';
+                        amountCurrency.textContent = 'RUB';
+                        shopBankInfo.classList.remove('hidden');
+                        bankAccountField.classList.add('hidden');
+                        transferNoteField.classList.remove('hidden');
+                        customerBankInput.required = false;
+                    } else {
+                        formTitle.textContent = 'Bayar Rupiah Cash, Terima Rubel';
+                        formSubtitle.textContent = 'Bayar IDR cash di kasir, RUB kami kirim ke rekening Anda';
+                        amountLabel.textContent = 'Jumlah Rupiah Cash';
+                        amountCurrency.textContent = 'IDR';
+                        shopBankInfo.classList.add('hidden');
+                        bankAccountField.classList.remove('hidden');
+                        transferNoteField.classList.add('hidden');
+                        customerBankInput.required = true;
+                    }
+                    updateEstimate();
+                    showScreen(screenForm);
+                });
+            });
+
+            $('back-btn').addEventListener('click', () => showScreen(screenSelect));
+
+            ticketForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                formError.classList.add('hidden');
+                const amt = parseFloat(amountInput.value) || 0;
+                if (amt <= 0) { formError.textContent = 'Jumlah harus lebih dari 0.'; formError.classList.remove('hidden'); return; }
+                if (selectedType === 'idr_to_rub' && !customerBankInput.value.trim()) {
+                    formError.textContent = 'Nomor rekening/kartu bank Rusia wajib diisi.'; formError.classList.remove('hidden'); return;
+                }
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Memproses...';
+                try {
+                    const res = await fetch('/api/queue', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            type: selectedType,
+                            amount: amt,
+                            customerName: nameInput.value.trim(),
+                            customerPhone: phoneInput.value.trim(),
+                            customerBankAccount: customerBankInput.value.trim(),
+                            transferNote: transferNoteInput.value.trim(),
+                        }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || 'Gagal mengambil antrian');
+
+                    localStorage.setItem('tokoruble_kios_ticket', data.id);
+                    startTicketPolling(data.id);
+                } catch (err) {
+                    formError.textContent = err.message || 'Gagal mengambil antrian. Coba lagi.';
+                    formError.classList.remove('hidden');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Ambil Nomor Antrian';
+                }
+            });
+
+            const statusStyle = {
+                menunggu: { text: 'Menunggu Dipanggil', color: 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10', hint: 'Silakan tunggu, staf kami akan memanggil nomor Anda.' },
+                dipanggil: { text: 'Sedang Dilayani', color: 'text-blue-400 border-blue-500/30 bg-blue-500/10', hint: 'Nomor Anda dipanggil! Silakan menuju konter TokoRuble.' },
+                selesai: { text: 'Selesai', color: 'text-green-400 border-green-500/30 bg-green-500/10', hint: 'Transaksi selesai. Terima kasih sudah menggunakan TokoRuble!' },
+                dibatalkan: { text: 'Dibatalkan', color: 'text-red-400 border-red-500/30 bg-red-500/10', hint: 'Antrian ini dibatalkan. Hubungi staf jika ini keliru.' },
+            };
+
+            const renderTicket = (d) => {
+                $('ticket-number').textContent = d.queueNumber;
+                $('ticket-type').textContent = d.type === 'rub_to_idr' ? 'Transfer RUB → Cash IDR' : 'Cash IDR → Kirim RUB';
+                $('ticket-amount').textContent = d.type === 'rub_to_idr' ? `${formatNum(d.amount, 2)} RUB` : formatIDR(d.amount);
+                $('ticket-result').textContent = d.type === 'rub_to_idr' ? formatIDR(d.estimatedResult) : `${formatNum(d.estimatedResult, 2)} RUB`;
+                $('ticket-rate').textContent = `1 RUB = ${formatNum(d.rate, 2)} IDR`;
+
+                const st = statusStyle[d.status] || statusStyle.menunggu;
+                const badge = $('status-badge');
+                badge.className = `inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-black uppercase tracking-widest mb-6 ${st.color}`;
+                $('status-text').textContent = st.text;
+                $('ticket-hint').textContent = st.hint;
+
+                const newBtn = $('new-ticket-btn');
+                if (d.status === 'selesai' || d.status === 'dibatalkan') {
+                    newBtn.classList.remove('hidden');
+                    if (ticketPollTimer) { clearInterval(ticketPollTimer); ticketPollTimer = null; }
+                } else {
+                    newBtn.classList.add('hidden');
+                    if (d.status === 'dipanggil' && navigator.vibrate) navigator.vibrate([200, 100, 200]);
+                }
+            };
+
+            const startTicketPolling = (id) => {
+                showScreen(screenTicket);
+                const poll = async () => {
+                    try {
+                        const res = await fetch(`/api/queue/${id}`);
+                        if (res.status === 404) {
+                            localStorage.removeItem('tokoruble_kios_ticket');
+                            if (ticketPollTimer) clearInterval(ticketPollTimer);
+                            showScreen(screenSelect);
+                            return;
+                        }
+                        if (!res.ok) return;
+                        renderTicket(await res.json());
+                    } catch (e) { /* coba lagi di polling berikutnya */ }
+                };
+                poll();
+                if (ticketPollTimer) clearInterval(ticketPollTimer);
+                ticketPollTimer = setInterval(poll, 3000);
+            };
+
+            $('new-ticket-btn').addEventListener('click', () => {
+                localStorage.removeItem('tokoruble_kios_ticket');
+                if (ticketPollTimer) { clearInterval(ticketPollTimer); ticketPollTimer = null; }
+                showScreen(screenSelect);
+            });
+
+            fetchSettings();
+            settingsPollTimer = setInterval(fetchSettings, 15000);
+
+            const savedTicket = localStorage.getItem('tokoruble_kios_ticket');
+            if (savedTicket) {
+                startTicketPolling(savedTicket);
+            } else {
+                showScreen(screenSelect);
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TokoRuble Kios — Admin Dashboard</title>
+    <meta name="theme-color" content="#09090b">
+    <meta name="robots" content="noindex, nofollow">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-primary: #f97316;
+            --brand-secondary: #ea580c;
+            --bg-dark: #09090b;
+            --glass-bg: rgba(15, 15, 18, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-dark);
+            background-image:
+                radial-gradient(at 0% 0%, rgba(249, 115, 22, 0.12) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #f4f4f5;
+        }
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+            border-radius: 1.5rem;
+        }
+        .input-glass {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 1rem;
+        }
+        .input-glass:focus-within, .input-glass:focus { border-color: var(--brand-primary); }
+        .primary-btn { background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary)); transition: all 0.2s ease; }
+        .primary-btn:active:not(:disabled) { transform: scale(0.98); }
+        .primary-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .ticket-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 1.25rem; }
+        .hidden { display: none !important; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: white; }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- LOGIN -->
+    <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="glass-card p-8 w-full max-w-sm">
+            <h1 class="text-xl font-black text-white text-center mb-1">TokoRuble <span class="text-orange-500">Kios</span></h1>
+            <p class="text-zinc-500 text-xs text-center uppercase tracking-widest font-bold mb-6">Admin Dashboard</p>
+            <form id="login-form" class="space-y-4">
+                <div class="input-glass px-4">
+                    <input type="password" id="login-password" required placeholder="Password Admin Kios" class="w-full bg-transparent py-3.5 text-white text-sm outline-none placeholder-zinc-600">
+                </div>
+                <p id="login-error" class="text-red-400 text-xs font-bold text-center hidden"></p>
+                <button type="submit" id="login-submit" class="primary-btn w-full text-white font-black py-3.5 rounded-xl text-xs uppercase tracking-[0.2em]">Masuk</button>
+            </form>
+            <p class="text-zinc-600 text-[10px] text-center mt-5">Password ini khusus dashboard kios, diatur lewat Environment Variables Vercel.</p>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard-screen" class="hidden max-w-7xl mx-auto p-4 md:p-8">
+        <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+            <div>
+                <h1 class="text-xl md:text-2xl font-black text-white">Antrian Kios <span class="text-orange-500">TokoRuble</span></h1>
+                <p class="text-zinc-500 text-xs font-mono" id="rate-display">Kurs: -</p>
+            </div>
+            <div class="flex gap-2">
+                <button id="settings-btn" class="glass-card px-4 py-2.5 text-xs font-bold text-white">⚙️ Pengaturan</button>
+                <button id="logout-btn" class="glass-card px-4 py-2.5 text-xs font-bold text-red-400">Keluar</button>
+            </div>
+        </div>
+
+        <!-- SETTINGS PANEL -->
+        <div id="settings-panel" class="glass-card p-6 mb-6 hidden">
+            <div class="grid md:grid-cols-3 gap-6">
+                <div>
+                    <h3 class="text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Kurs Kios</h3>
+                    <p class="text-zinc-600 text-[11px] mb-3">Kurs manual khusus kios (terpisah dari kurs website online).</p>
+                    <form id="rate-form" class="flex gap-2">
+                        <div class="input-glass px-3 flex-1"><input type="number" step="any" id="rate-input" placeholder="mis. 200" class="w-full bg-transparent py-2.5 text-white text-sm outline-none placeholder-zinc-600"></div>
+                        <button type="submit" class="primary-btn text-white font-black py-2.5 px-4 rounded-xl text-[11px] uppercase tracking-widest">Simpan</button>
+                    </form>
+                </div>
+                <div>
+                    <h3 class="text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Rekening Bank Rusia Toko</h3>
+                    <p class="text-zinc-600 text-[11px] mb-3">Ditampilkan ke customer saat memilih transfer Rubel ke Anda.</p>
+                    <form id="bank-form" class="space-y-3">
+                        <div class="input-glass px-3"><input type="text" id="bank-name-input" placeholder="Nama Bank (mis. Sberbank)" class="w-full bg-transparent py-2.5 text-white text-sm outline-none placeholder-zinc-600"></div>
+                        <div class="input-glass px-3"><input type="text" id="bank-account-input" placeholder="Nomor Rekening/Kartu" class="w-full bg-transparent py-2.5 text-white text-sm outline-none placeholder-zinc-600"></div>
+                        <div class="input-glass px-3"><input type="text" id="bank-holder-input" placeholder="Atas Nama" class="w-full bg-transparent py-2.5 text-white text-sm outline-none placeholder-zinc-600"></div>
+                        <button type="submit" class="primary-btn text-white font-black py-2.5 px-5 rounded-xl text-[11px] uppercase tracking-widest">Simpan</button>
+                        <span id="bank-saved-msg" class="text-green-400 text-[11px] font-bold ml-2 hidden">Tersimpan ✓</span>
+                    </form>
+                </div>
+                <div class="text-center">
+                    <h3 class="text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">QR Code Kios</h3>
+                    <p class="text-zinc-600 text-[11px] mb-3">Cetak dan tempel di konter agar customer bisa scan untuk ambil antrian.</p>
+                    <img id="qr-image" class="mx-auto rounded-xl bg-white p-2" width="160" height="160" alt="QR Kios">
+                    <p class="text-zinc-500 text-[10px] font-mono mt-2 break-all" id="kios-url"></p>
+                    <button id="print-qr-btn" class="glass-card px-4 py-2 text-[11px] font-bold text-white mt-3">🖨️ Cetak QR</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOARD -->
+        <div class="grid md:grid-cols-3 gap-5">
+            <div>
+                <h2 class="text-xs font-black text-yellow-400 uppercase tracking-widest mb-3 flex items-center gap-2">Menunggu <span id="count-menunggu" class="bg-yellow-500/10 border border-yellow-500/30 rounded-full px-2 py-0.5">0</span></h2>
+                <div id="col-menunggu" class="space-y-3 max-h-[70vh] overflow-y-auto custom-scroll pr-1"></div>
+            </div>
+            <div>
+                <h2 class="text-xs font-black text-blue-400 uppercase tracking-widest mb-3 flex items-center gap-2">Sedang Dilayani <span id="count-dipanggil" class="bg-blue-500/10 border border-blue-500/30 rounded-full px-2 py-0.5">0</span></h2>
+                <div id="col-dipanggil" class="space-y-3 max-h-[70vh] overflow-y-auto custom-scroll pr-1"></div>
+            </div>
+            <div>
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-xs font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">Selesai / Batal <span id="count-selesai" class="bg-white/5 border border-white/10 rounded-full px-2 py-0.5">0</span></h2>
+                    <button id="clear-done-btn" class="text-[10px] text-zinc-600 font-bold hover:text-red-400">Bersihkan</button>
+                </div>
+                <div id="col-selesai" class="space-y-3 max-h-[70vh] overflow-y-auto custom-scroll pr-1"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="print-area" class="hidden fixed"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const $ = (id) => document.getElementById(id);
+            const loginScreen = $('login-screen'), dashboardScreen = $('dashboard-screen');
+            const loginForm = $('login-form'), loginError = $('login-error'), loginSubmit = $('login-submit');
+            const settingsPanel = $('settings-panel');
+            let audioCtx = null;
+            let knownWaitingIds = new Set();
+            let boardPollTimer = null;
+            let firstBoardLoad = true;
+
+            const formatIDR = (v) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(v || 0);
+            const formatNum = (v, d = 2) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v || 0);
+            const escapeHTML = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+            const playBeep = () => {
+                try {
+                    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+                    const osc = audioCtx.createOscillator(), gain = audioCtx.createGain();
+                    osc.connect(gain); gain.connect(audioCtx.destination);
+                    osc.frequency.value = 880; gain.gain.value = 0.15;
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.18);
+                } catch (e) { /* audio tidak wajib */ }
+            };
+
+            // ---- AUTH ----
+            const showDashboard = () => {
+                loginScreen.classList.add('hidden');
+                dashboardScreen.classList.remove('hidden');
+                initDashboard();
+            };
+            const showLogin = () => {
+                dashboardScreen.classList.add('hidden');
+                loginScreen.classList.remove('hidden');
+                if (boardPollTimer) { clearInterval(boardPollTimer); boardPollTimer = null; }
+            };
+
+            fetch('/api/admin/me').then((r) => r.json()).then((d) => { if (d.authenticated) showDashboard(); }).catch(() => {});
+
+            loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                loginError.classList.add('hidden');
+                loginSubmit.disabled = true;
+                try {
+                    const res = await fetch('/api/admin/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: $('login-password').value }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.error || 'Login gagal');
+                    $('login-password').value = '';
+                    showDashboard();
+                } catch (err) {
+                    loginError.textContent = err.message || 'Password salah.';
+                    loginError.classList.remove('hidden');
+                } finally {
+                    loginSubmit.disabled = false;
+                }
+            });
+
+            $('logout-btn').addEventListener('click', async () => {
+                await fetch('/api/admin/logout', { method: 'POST' });
+                showLogin();
+            });
+
+            // ---- SETTINGS ----
+            $('settings-btn').addEventListener('click', () => settingsPanel.classList.toggle('hidden'));
+
+            const loadSettings = async () => {
+                const res = await fetch('/api/settings');
+                if (!res.ok) return;
+                const s = await res.json();
+                $('rate-display').textContent = `Kurs: 1 RUB = ${formatNum(s.rate || 200, 2)} IDR`;
+                $('rate-input').value = s.rate || '';
+                $('bank-name-input').value = s.bankName || '';
+                $('bank-account-input').value = s.accountNumber || '';
+                $('bank-holder-input').value = s.accountHolder || '';
+            };
+
+            $('rate-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const rate = parseFloat($('rate-input').value);
+                if (!rate || rate <= 0) return;
+                await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ rate }),
+                });
+                loadSettings();
+            });
+
+            $('bank-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        bankName: $('bank-name-input').value.trim(),
+                        accountNumber: $('bank-account-input').value.trim(),
+                        accountHolder: $('bank-holder-input').value.trim(),
+                    }),
+                });
+                const msg = $('bank-saved-msg');
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 2000);
+            });
+
+            // ---- QR CODE ----
+            const kiosURL = new URL('kios.html', window.location.href).toString();
+            $('kios-url').textContent = kiosURL;
+            $('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(kiosURL)}`;
+
+            $('print-qr-btn').addEventListener('click', () => {
+                const area = $('print-area');
+                area.innerHTML = `<div style="text-align:center;font-family:sans-serif;"><h2 style="margin-bottom:8px;">Scan untuk Ambil Antrian — TokoRuble</h2><img src="${$('qr-image').src}" width="300" height="300"><p style="margin-top:8px;font-size:12px;">${kiosURL}</p></div>`;
+                area.classList.remove('hidden');
+                window.print();
+                area.classList.add('hidden');
+            });
+
+            // ---- QUEUE BOARD ----
+            const renderTicket = (d) => {
+                const typeLabel = d.type === 'rub_to_idr' ? 'Transfer RUB → Cash IDR' : 'Cash IDR → Kirim RUB';
+                const amountText = d.type === 'rub_to_idr' ? `${formatNum(d.amount, 2)} RUB` : formatIDR(d.amount);
+                const resultText = d.type === 'rub_to_idr' ? formatIDR(d.estimatedResult) : `${formatNum(d.estimatedResult, 2)} RUB`;
+                const extra = d.type === 'idr_to_rub'
+                    ? `<div class="text-[11px] text-zinc-400 mt-1">Rek. tujuan: <span class="text-white font-mono">${escapeHTML(d.customerBankAccount)}</span></div>`
+                    : (d.transferNote ? `<div class="text-[11px] text-zinc-400 mt-1">Catatan: <span class="text-white">${escapeHTML(d.transferNote)}</span></div>` : '');
+
+                let actions = '';
+                if (d.status === 'menunggu') {
+                    actions = `<button data-action="dipanggil" data-id="${d.id}" class="action-btn bg-blue-500/15 border border-blue-500/30 text-blue-300 text-[11px] font-black py-2 rounded-lg">Panggil</button>
+                               <button data-action="dibatalkan" data-id="${d.id}" class="action-btn bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] font-black py-2 rounded-lg">Batal</button>`;
+                } else if (d.status === 'dipanggil') {
+                    actions = `<button data-action="selesai" data-id="${d.id}" class="action-btn bg-green-500/15 border border-green-500/30 text-green-300 text-[11px] font-black py-2 rounded-lg">Selesai</button>
+                               <button data-action="dibatalkan" data-id="${d.id}" class="action-btn bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] font-black py-2 rounded-lg">Batal</button>`;
+                }
+
+                return `
+                <div class="ticket-card p-4" data-ticket-id="${d.id}">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xl font-black text-white">${escapeHTML(d.queueNumber)}</span>
+                        <span class="text-[9px] text-zinc-600 font-mono">${d.createdAt ? new Date(d.createdAt).toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'}) : ''}</span>
+                    </div>
+                    <p class="text-[11px] font-bold text-orange-400 uppercase tracking-wide">${typeLabel}</p>
+                    <p class="text-white text-sm font-black mt-1">${escapeHTML(d.customerName)} <span class="text-zinc-500 font-normal">· ${escapeHTML(d.customerPhone)}</span></p>
+                    <div class="text-[11px] text-zinc-400 mt-2">Bayar: <span class="text-white font-bold">${amountText}</span></div>
+                    <div class="text-[11px] text-zinc-400">Terima: <span class="text-green-400 font-bold">${resultText}</span></div>
+                    ${extra}
+                    ${actions ? `<div class="grid grid-cols-2 gap-2 mt-3">${actions}</div>` : ''}
+                </div>`;
+            };
+
+            const loadBoard = async () => {
+                try {
+                    const res = await fetch('/api/queue');
+                    if (res.status === 401) { showLogin(); return; }
+                    if (!res.ok) return;
+                    const tickets = await res.json();
+
+                    const cols = { menunggu: [], dipanggil: [], done: [] };
+                    const waitingIdsNow = new Set();
+                    tickets.forEach((d) => {
+                        if (d.status === 'menunggu') { cols.menunggu.push(d); waitingIdsNow.add(d.id); }
+                        else if (d.status === 'dipanggil') cols.dipanggil.push(d);
+                        else cols.done.push(d);
+                    });
+
+                    let hasNew = false;
+                    waitingIdsNow.forEach((id) => { if (!knownWaitingIds.has(id)) hasNew = true; });
+                    if (hasNew && !firstBoardLoad) playBeep();
+                    knownWaitingIds = waitingIdsNow;
+                    firstBoardLoad = false;
+
+                    $('col-menunggu').innerHTML = cols.menunggu.map(renderTicket).join('') || '<p class="text-zinc-700 text-xs text-center py-6">Tidak ada antrian</p>';
+                    $('col-dipanggil').innerHTML = cols.dipanggil.map(renderTicket).join('') || '<p class="text-zinc-700 text-xs text-center py-6">Kosong</p>';
+                    $('col-selesai').innerHTML = cols.done.slice().reverse().map(renderTicket).join('') || '<p class="text-zinc-700 text-xs text-center py-6">Kosong</p>';
+
+                    $('count-menunggu').textContent = cols.menunggu.length;
+                    $('count-dipanggil').textContent = cols.dipanggil.length;
+                    $('count-selesai').textContent = cols.done.length;
+                } catch (e) { /* polling berikutnya akan coba lagi */ }
+            };
+
+            let boardClickBound = false;
+            const initDashboard = () => {
+                loadSettings();
+                loadBoard();
+                if (boardPollTimer) clearInterval(boardPollTimer);
+                boardPollTimer = setInterval(loadBoard, 3000);
+
+                if (!boardClickBound) {
+                    boardClickBound = true;
+                    document.body.addEventListener('click', async (e) => {
+                        const btn = e.target.closest('.action-btn');
+                        if (!btn) return;
+                        const id = btn.dataset.id, action = btn.dataset.action;
+                        btn.disabled = true;
+                        await fetch(`/api/queue/${id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ status: action }),
+                        });
+                        loadBoard();
+                    });
+
+                    $('clear-done-btn').addEventListener('click', async () => {
+                        if (!confirm('Hapus semua tiket Selesai/Dibatalkan dari daftar?')) return;
+                        await fetch('/api/queue', { method: 'DELETE' });
+                        loadBoard();
+                    });
+                }
+            };
+        });
+    </script>
+</body>
+</html>
