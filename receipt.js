@@ -80,32 +80,36 @@ function generateReceiptPDF(ticket, lang) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'mm', format: [80, 180] });
     const centerX = 40;
-    let y = 10;
+    let y = 12;
 
-    doc.setFont('courier', 'bold');
-    doc.setFontSize(13);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(14);
     doc.text(receiptT(lang, 'title'), centerX, y, { align: 'center' });
-    y += 6;
-    doc.setFont('courier', 'normal');
+    y += 7;
+
+    doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
+    doc.setTextColor(60, 60, 60);
     doc.text(receiptT(lang, 'subtitle'), centerX, y, { align: 'center' });
     y += 5;
+    doc.setTextColor(0, 0, 0);
     doc.line(5, y, 75, y);
-    y += 6;
+    y += 7;
 
-    doc.setFontSize(8.5);
+    doc.setFontSize(9);
     receiptFields(ticket, lang).forEach(([label, value]) => {
-        doc.setFont('courier', 'bold');
+        doc.setTextColor(90, 90, 90);
         doc.text(label, 5, y);
-        doc.setFont('courier', 'normal');
+        doc.setTextColor(0, 0, 0);
         doc.text(String(value), 75, y, { align: 'right' });
-        y += 5.5;
+        y += 6;
     });
 
     y += 1;
     doc.line(5, y, 75, y);
-    y += 6;
-    doc.setFontSize(8);
+    y += 7;
+    doc.setFontSize(8.5);
+    doc.setTextColor(60, 60, 60);
     doc.text(receiptT(lang, 'thanks'), centerX, y, { align: 'center', maxWidth: 68 });
 
     return doc;
