@@ -213,13 +213,12 @@
 
             <p id="ticket-hint" class="text-zinc-400 text-xs leading-relaxed mb-6">Silakan tunggu, staf kami akan memanggil nomor Anda.</p>
 
-            <button id="download-receipt-btn" class="hidden w-full primary-btn text-white font-black py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em] mb-3">Unduh Bukti Transaksi (PDF)</button>
+            <button id="download-receipt-btn" class="hidden w-full primary-btn text-white font-black py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em] mb-3">Cetak / Simpan Bukti (PDF)</button>
             <button id="new-ticket-btn" class="hidden w-full bg-white/5 border border-white/10 text-white font-black py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em]">Ambil Antrian Baru</button>
         </div>
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <script src="receipt.js"></script>
     <script>
         const I18N = {
@@ -285,7 +284,7 @@
                 actionCallDescTransfer: 'Transfer ke rekening di atas, lalu tunjukkan bukti transfer ke petugas kami.',
                 actionCallTitleCash: 'Silakan Serahkan Uang Cash',
                 actionCallDescCash: 'Serahkan uang cash sejumlah di atas kepada petugas kami sekarang.',
-                downloadReceiptBtn: 'Unduh Bukti Transaksi (PDF)',
+                downloadReceiptBtn: 'Cetak / Simpan Bukti (PDF)',
             },
             ru: {
                 kiosWord: 'Киоск',
@@ -349,7 +348,7 @@
                 actionCallDescTransfer: 'Переведите на счёт выше, затем покажите подтверждение перевода нашему сотруднику.',
                 actionCallTitleCash: 'Передайте наличные сейчас',
                 actionCallDescCash: 'Передайте указанную выше сумму наличными нашему сотруднику сейчас.',
-                downloadReceiptBtn: 'Скачать чек (PDF)',
+                downloadReceiptBtn: 'Печать / Сохранить чек (PDF)',
             },
         };
 
@@ -673,8 +672,8 @@
             $('download-receipt-btn').addEventListener('click', () => {
                 if (!lastTicketData) return;
                 try {
-                    downloadReceiptPDF(lastTicketData, lang);
-                } catch (e) { console.error('Gagal membuat PDF', e); }
+                    openReceiptWindow(lastTicketData, lang, true);
+                } catch (e) { console.error('Gagal membuka jendela struk', e); }
             });
 
             setLang(lang);

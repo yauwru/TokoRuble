@@ -83,50 +83,6 @@ function receiptFields(ticket, lang) {
     return fields;
 }
 
-function generateReceiptPDF(ticket, lang) {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'mm', format: [80, 180] });
-    const centerX = 40;
-    let y = 12;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.text(receiptT(lang, 'title'), centerX, y, { align: 'center' });
-    y += 7;
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(60, 60, 60);
-    doc.text(receiptT(lang, 'subtitle'), centerX, y, { align: 'center' });
-    y += 5;
-    doc.setTextColor(0, 0, 0);
-    doc.line(5, y, 75, y);
-    y += 7;
-
-    doc.setFontSize(9);
-    receiptFields(ticket, lang).forEach(([label, value]) => {
-        doc.setTextColor(90, 90, 90);
-        doc.text(label, 5, y);
-        doc.setTextColor(0, 0, 0);
-        doc.text(String(value), 75, y, { align: 'right' });
-        y += 6;
-    });
-
-    y += 1;
-    doc.line(5, y, 75, y);
-    y += 7;
-    doc.setFontSize(8.5);
-    doc.setTextColor(60, 60, 60);
-    doc.text(receiptT(lang, 'thanks'), centerX, y, { align: 'center', maxWidth: 68 });
-
-    return doc;
-}
-
-function downloadReceiptPDF(ticket, lang) {
-    const doc = generateReceiptPDF(ticket, lang);
-    doc.save(`TokoRuble-${ticket.queueNumber}.pdf`);
-}
-
 function renderReceiptPrintHTML(ticket, lang) {
     const rows = receiptFields(ticket, lang)
         .map(([label, value]) => `<div style="display:flex;justify-content:space-between;gap:12px;margin:3px 0;"><span>${receiptEscapeHTML(label)}</span><span style="font-weight:bold;text-align:right;">${receiptEscapeHTML(String(value))}</span></div>`)
@@ -141,4 +97,19 @@ function renderReceiptPrintHTML(ticket, lang) {
             <div style="text-align:center;font-size:12px;margin-top:10px;">${receiptEscapeHTML(receiptT(lang, 'thanks'))}</div>
         </div>
     `;
+}
+
+function openReceiptWindow(ticket, lang, autoPrint) {
+    const html = renderReceiptPrintHTML(ticket, lang);
+    const left = Math.max(0, (window.screen.width || 1200) - 420);
+    const w = window.open('', 'TokoRubleReceiptWindow', `width=380,height=640,left=${left},top=80`);
+    if (!w) {
+        console.warn('Popup bukti transaksi diblokir browser. Izinkan popup untuk situs ini.');
+        return null;
+    }
+    const printScript = autoPrint ? '<script>window.onload=function(){window.print();};<\/script>' : '';
+    w.document.open();
+    w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${receiptEscapeHTML(receiptT(lang, 'subtitle'))} - ${receiptEscapeHTML(ticket.queueNumber)}</title><style>body{margin:16px;font-family:sans-serif;background:#fff;}</style></head><body>${html}${printScript}</body></html>`);
+    w.document.close();
+    return w;
 }
