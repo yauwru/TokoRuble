@@ -108,8 +108,14 @@ async function recordCompletedTransaction(ticket) {
   return updated;
 }
 
+async function resetTodayCounters() {
+  const date = todayWIB();
+  await kv.del(`kios:counter:J:${date}`);
+  await kv.del(`kios:counter:B:${date}`);
+}
+
 module.exports = {
   todayWIB, getSettings, setSettings, nextQueueNumber,
   createTicket, getTicket, updateTicket, listTodayTickets, deleteTickets,
-  normalizePhone, getCustomer, recordCompletedTransaction,
+  normalizePhone, getCustomer, recordCompletedTransaction, resetTodayCounters,
 };

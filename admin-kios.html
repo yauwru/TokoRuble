@@ -148,6 +148,11 @@
                         <button type="submit" class="primary-btn text-white font-black py-2.5 px-4 rounded-xl text-[11px] uppercase tracking-widest">Simpan</button>
                     </form>
                 </div>
+                <div>
+                    <h3 class="text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Reset Nomor Antrian</h3>
+                    <p class="text-zinc-600 text-[11px] mb-3">Nomor antrian otomatis reset ke 001 tiap hari baru. Tombol ini untuk reset manual di tengah hari (mis. testing/kesalahan) — semua antrian hari ini ikut terhapus.</p>
+                    <button id="reset-queue-btn" type="button" class="bg-red-500/10 border border-red-500/30 text-red-400 font-black py-2.5 px-5 rounded-xl text-[11px] uppercase tracking-widest">Reset Sekarang</button>
+                </div>
             </div>
         </div>
 
@@ -381,6 +386,12 @@
                     body: JSON.stringify({ totalWindows: total }),
                 });
                 loadSettings();
+            });
+
+            $('reset-queue-btn').addEventListener('click', async () => {
+                if (!confirm('Ini akan menghapus SEMUA antrian hari ini dan mengembalikan nomor ke 001. Lanjutkan?')) return;
+                await fetch('/api/queue/reset', { method: 'POST' });
+                loadBoard();
             });
 
             // ---- QR CODE ----
