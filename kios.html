@@ -70,6 +70,8 @@
         .hidden { display: none !important; }
         .lang-btn { color: #71717a; }
         .lang-btn.active { background: var(--brand-primary); color: #fff; }
+        #howto-chevron { transition: transform 0.25s ease; }
+        #howto-chevron.collapsed { transform: rotate(-90deg); }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
@@ -118,18 +120,26 @@
             <p id="rate-preview" class="text-center text-zinc-600 text-[11px] mt-5 font-mono"></p>
         </div>
 
+        <!-- HOW-TO (COLLAPSIBLE) -->
+        <div class="glass-card p-5 mt-4 fade-in">
+            <button id="howto-toggle" type="button" class="w-full flex items-center justify-between text-left">
+                <span id="txt-howto-title" class="text-xs font-black text-zinc-300 uppercase tracking-widest">Cara Menggunakan Kios</span>
+                <span id="howto-chevron" class="text-zinc-500">&#9662;</span>
+            </button>
+            <div id="howto-content" class="mt-3 space-y-1.5 text-xs text-zinc-400 leading-relaxed">
+                <p id="txt-howto-step1"></p>
+                <p id="txt-howto-step2"></p>
+                <p id="txt-howto-step3"></p>
+                <p id="txt-howto-step4"></p>
+                <p id="txt-howto-step5"></p>
+            </div>
+        </div>
+
         <!-- SCREEN 2: FORM -->
         <div id="screen-form" class="glass-card p-6 fade-in hidden">
             <button id="back-btn" type="button" class="text-zinc-500 text-xs font-bold mb-4 flex items-center gap-1"></button>
             <h2 id="form-title" class="font-black text-white text-lg mb-1"></h2>
             <p id="form-subtitle" class="text-zinc-500 text-xs mb-5"></p>
-
-            <div id="shop-bank-info" class="hidden bg-orange-500/10 border border-orange-500/30 rounded-2xl p-4 mb-5">
-                <p id="txt-shop-bank-title" class="text-[10px] font-black text-orange-400 uppercase tracking-widest mb-2">Transfer Rubel Ke Rekening Kami</p>
-                <p class="text-white text-sm font-bold" id="shop-bank-name">-</p>
-                <p class="text-zinc-300 text-sm font-mono" id="shop-bank-account">-</p>
-                <p class="text-zinc-400 text-xs" id="shop-bank-holder">-</p>
-            </div>
 
             <form id="ticket-form" class="space-y-4">
                 <div>
@@ -145,13 +155,6 @@
                     <label id="txt-bank-account-label" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Nomor Rekening/Kartu Bank Rusia Anda</label>
                     <div class="input-glass px-4 mt-1">
                         <input type="text" id="customer-bank-input" class="w-full bg-transparent py-3.5 text-white font-bold outline-none placeholder-zinc-600" placeholder="4276 xxxx xxxx xxxx">
-                    </div>
-                </div>
-
-                <div id="transfer-note-field" class="hidden">
-                    <label id="txt-transfer-note-label" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Catatan Transfer (Opsional)</label>
-                    <div class="input-glass px-4 mt-1">
-                        <input type="text" id="transfer-note-input" class="w-full bg-transparent py-3.5 text-white font-bold outline-none placeholder-zinc-600" placeholder="4 digit akhir kartu / no. referensi">
                     </div>
                 </div>
 
@@ -192,6 +195,16 @@
                 <div class="flex justify-between text-xs"><span id="txt-field-kurs" class="text-zinc-500">Kurs</span><span id="ticket-rate" class="text-zinc-400 font-mono text-[11px]"></span></div>
             </div>
 
+            <div id="ticket-action" class="hidden text-left rounded-2xl p-4 mb-6">
+                <p id="ticket-action-title" class="text-[10px] font-black uppercase tracking-widest mb-2"></p>
+                <div id="ticket-action-bank" class="hidden mb-2">
+                    <p class="text-white text-sm font-bold" id="action-bank-name">-</p>
+                    <p class="text-zinc-300 text-sm font-mono" id="action-bank-account">-</p>
+                    <p class="text-zinc-400 text-xs" id="action-bank-holder"></p>
+                </div>
+                <p id="ticket-action-desc" class="text-zinc-300 text-xs leading-relaxed"></p>
+            </div>
+
             <p id="ticket-hint" class="text-zinc-400 text-xs leading-relaxed mb-6">Silakan tunggu, staf kami akan memanggil nomor Anda.</p>
 
             <button id="new-ticket-btn" class="hidden w-full bg-white/5 border border-white/10 text-white font-black py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em]">Ambil Antrian Baru</button>
@@ -211,20 +224,23 @@
                 service2Desc: 'Bayar IDR cash, RUB kami kirim ke rekening Anda',
                 rateLabel: 'Kurs saat ini:',
                 back: '← Kembali',
-                shopBankTitle: 'Transfer Rubel Ke Rekening Kami',
                 atasNama: 'a.n.',
+                howToTitle: 'Cara Menggunakan Kios',
+                howToStep1: '1. Pilih layanan yang Anda butuhkan.',
+                howToStep2: '2. Isi data & jumlah, lalu ambil nomor antrian.',
+                howToStep3: '3. Tunggu sampai status berubah jadi "Sedang Dilayani".',
+                howToStep4: '4. Setelah dipanggil, baru transfer atau serahkan uang sesuai instruksi di layar.',
+                howToStep5: '5. Tunjukkan layar ini ke petugas kami untuk verifikasi.',
                 form1Title: 'Transfer Rubel, Terima Rupiah',
-                form1Subtitle: 'Transfer RUB ke rekening kami, ambil cash IDR di kasir',
+                form1Subtitle: 'Ambil nomor antrian dulu — instruksi transfer muncul setelah Anda dipanggil',
                 form2Title: 'Bayar Rupiah Cash, Terima Rubel',
-                form2Subtitle: 'Bayar IDR cash di kasir, RUB kami kirim ke rekening Anda',
+                form2Subtitle: 'Ambil nomor antrian dulu — instruksi bayar muncul setelah Anda dipanggil',
                 amountLabel1: 'Jumlah Rubel Ditransfer',
                 amountLabel2: 'Jumlah Rupiah Cash',
                 estimateNone: 'Estimasi: -',
                 estimateReceiveLabel: 'Estimasi diterima:',
                 bankAccountLabel: 'Nomor Rekening/Kartu Bank Rusia Anda',
                 bankAccountPlaceholder: '4276 xxxx xxxx xxxx',
-                transferNoteLabel: 'Catatan Transfer (Opsional)',
-                transferNotePlaceholder: '4 digit akhir kartu / no. referensi',
                 nameLabel: 'Nama Lengkap',
                 namePlaceholder: 'Nama Anda',
                 phoneLabel: 'No. HP / WhatsApp',
@@ -247,9 +263,15 @@
                 statusSelesai: 'Selesai',
                 statusDibatalkan: 'Dibatalkan',
                 hintMenunggu: 'Silakan tunggu, staf kami akan memanggil nomor Anda.',
-                hintDipanggil: 'Nomor Anda dipanggil! Silakan menuju konter TokoRuble.',
+                hintDipanggil: 'Silakan menuju konter TokoRuble sekarang.',
                 hintSelesai: 'Transaksi selesai. Terima kasih sudah menggunakan TokoRuble!',
                 hintDibatalkan: 'Antrian ini dibatalkan. Hubungi staf jika ini keliru.',
+                actionWaitTitle: 'Belum Perlu Bayar',
+                actionWaitDesc: 'Mohon tunggu sampai nomor Anda dipanggil sebelum transfer atau menyerahkan uang.',
+                actionCallTitleTransfer: 'Silakan Transfer Sekarang',
+                actionCallDescTransfer: 'Transfer ke rekening di atas, lalu tunjukkan bukti transfer ke petugas kami.',
+                actionCallTitleCash: 'Silakan Serahkan Uang Cash',
+                actionCallDescCash: 'Serahkan uang cash sejumlah di atas kepada petugas kami sekarang.',
             },
             ru: {
                 kiosWord: 'Киоск',
@@ -261,20 +283,23 @@
                 service2Desc: 'Оплатите IDR наличными, мы отправим RUB на ваш счёт',
                 rateLabel: 'Текущий курс:',
                 back: '← Назад',
-                shopBankTitle: 'Переведите рубли на наш счёт',
                 atasNama: 'на имя',
+                howToTitle: 'Как пользоваться киоском',
+                howToStep1: '1. Выберите нужную услугу.',
+                howToStep2: '2. Заполните данные и сумму, получите номер очереди.',
+                howToStep3: '3. Дождитесь статуса «Вас обслуживают».',
+                howToStep4: '4. После вызова — переведите деньги или передайте наличные по инструкции на экране.',
+                howToStep5: '5. Покажите этот экран нашему сотруднику для проверки.',
                 form1Title: 'Перевод рублей, получение рупий',
-                form1Subtitle: 'Переведите RUB на наш счёт, заберите наличные IDR в кассе',
+                form1Subtitle: 'Сначала получите номер очереди — инструкция по переводу появится после вызова',
                 form2Title: 'Оплата рупиями наличными, получение рублей',
-                form2Subtitle: 'Оплатите IDR наличными в кассе, мы отправим RUB на ваш счёт',
+                form2Subtitle: 'Сначала получите номер очереди — инструкция по оплате появится после вызова',
                 amountLabel1: 'Сумма перевода в рублях',
                 amountLabel2: 'Сумма наличных (IDR)',
                 estimateNone: 'Примерная сумма: -',
                 estimateReceiveLabel: 'Вы получите примерно:',
                 bankAccountLabel: 'Номер счёта/карты вашего российского банка',
                 bankAccountPlaceholder: '4276 xxxx xxxx xxxx',
-                transferNoteLabel: 'Примечание к переводу (необязательно)',
-                transferNotePlaceholder: 'Последние 4 цифры карты / номер операции',
                 nameLabel: 'Полное имя',
                 namePlaceholder: 'Ваше имя',
                 phoneLabel: 'Номер телефона / WhatsApp',
@@ -297,9 +322,15 @@
                 statusSelesai: 'Завершено',
                 statusDibatalkan: 'Отменено',
                 hintMenunggu: 'Пожалуйста, подождите — сотрудник вызовет ваш номер.',
-                hintDipanggil: 'Ваш номер вызван! Пожалуйста, подойдите к стойке TokoRuble.',
+                hintDipanggil: 'Пожалуйста, подойдите к стойке TokoRuble сейчас.',
                 hintSelesai: 'Операция завершена. Спасибо, что воспользовались TokoRuble!',
                 hintDibatalkan: 'Эта очередь отменена. Обратитесь к сотруднику, если это ошибка.',
+                actionWaitTitle: 'Оплата пока не нужна',
+                actionWaitDesc: 'Пожалуйста, дождитесь вызова вашего номера, прежде чем переводить деньги или передавать наличные.',
+                actionCallTitleTransfer: 'Переведите деньги сейчас',
+                actionCallDescTransfer: 'Переведите на счёт выше, затем покажите подтверждение перевода нашему сотруднику.',
+                actionCallTitleCash: 'Передайте наличные сейчас',
+                actionCallDescCash: 'Передайте указанную выше сумму наличными нашему сотруднику сейчас.',
             },
         };
 
@@ -310,11 +341,10 @@
             const amountInput = $('amount-input'), amountLabel = $('amount-label'), amountCurrency = $('amount-currency');
             const estimateText = $('estimate-text');
             const bankAccountField = $('bank-account-field'), customerBankInput = $('customer-bank-input');
-            const transferNoteField = $('transfer-note-field'), transferNoteInput = $('transfer-note-input');
-            const shopBankInfo = $('shop-bank-info'), shopBankName = $('shop-bank-name'), shopBankAccount = $('shop-bank-account'), shopBankHolder = $('shop-bank-holder');
             const nameInput = $('name-input'), phoneInput = $('phone-input');
             const ticketForm = $('ticket-form'), submitBtn = $('submit-btn'), formError = $('form-error');
             const ratePreview = $('rate-preview');
+            const howtoToggle = $('howto-toggle'), howtoContent = $('howto-content'), howtoChevron = $('howto-chevron');
 
             let currentRate = 200;
             let selectedType = null;
@@ -333,12 +363,6 @@
                 ratePreview.textContent = `${t('rateLabel')} 1 RUB = ${formatNum(currentRate, 2)} IDR`;
             };
 
-            const renderShopBankInfo = () => {
-                shopBankName.textContent = lastShopBank.bankName || '-';
-                shopBankAccount.textContent = lastShopBank.accountNumber || '-';
-                shopBankHolder.textContent = lastShopBank.accountHolder ? `${t('atasNama')} ${lastShopBank.accountHolder}` : '';
-            };
-
             const fetchSettings = async () => {
                 try {
                     const res = await fetch('/api/settings');
@@ -347,8 +371,8 @@
                     currentRate = s.rate || 200;
                     lastShopBank = s;
                     renderRatePreview();
-                    renderShopBankInfo();
                     updateEstimate();
+                    if (lastTicketData) renderTicket(lastTicketData);
                 } catch (e) { /* polling berikutnya akan coba lagi */ }
             };
 
@@ -378,8 +402,6 @@
                 }
                 $('txt-bank-account-label').textContent = t('bankAccountLabel');
                 customerBankInput.placeholder = t('bankAccountPlaceholder');
-                $('txt-transfer-note-label').textContent = t('transferNoteLabel');
-                transferNoteInput.placeholder = t('transferNotePlaceholder');
                 updateEstimate();
             };
 
@@ -392,7 +414,12 @@
                 $('txt-service2-title').textContent = t('service2Title');
                 $('txt-service2-desc').textContent = t('service2Desc');
                 $('back-btn').textContent = t('back');
-                $('txt-shop-bank-title').textContent = t('shopBankTitle');
+                $('txt-howto-title').textContent = t('howToTitle');
+                $('txt-howto-step1').textContent = t('howToStep1');
+                $('txt-howto-step2').textContent = t('howToStep2');
+                $('txt-howto-step3').textContent = t('howToStep3');
+                $('txt-howto-step4').textContent = t('howToStep4');
+                $('txt-howto-step5').textContent = t('howToStep5');
                 $('txt-name-label').textContent = t('nameLabel');
                 nameInput.placeholder = t('namePlaceholder');
                 $('txt-phone-label').textContent = t('phoneLabel');
@@ -405,7 +432,6 @@
                 $('txt-field-kurs').textContent = t('fieldKurs');
                 $('new-ticket-btn').textContent = t('newTicketBtn');
                 renderRatePreview();
-                renderShopBankInfo();
                 applyFormTexts();
                 if (lastTicketData) renderTicket(lastTicketData);
             };
@@ -420,6 +446,11 @@
             $('lang-id-btn').addEventListener('click', () => setLang('id'));
             $('lang-ru-btn').addEventListener('click', () => setLang('ru'));
 
+            howtoToggle.addEventListener('click', () => {
+                howtoContent.classList.toggle('hidden');
+                howtoChevron.classList.toggle('collapsed');
+            });
+
             document.querySelectorAll('.service-btn').forEach((btn) => {
                 btn.addEventListener('click', () => {
                     selectedType = btn.dataset.type;
@@ -427,15 +458,11 @@
                     formError.classList.add('hidden');
                     if (selectedType === 'rub_to_idr') {
                         amountCurrency.textContent = 'RUB';
-                        shopBankInfo.classList.remove('hidden');
                         bankAccountField.classList.add('hidden');
-                        transferNoteField.classList.remove('hidden');
                         customerBankInput.required = false;
                     } else {
                         amountCurrency.textContent = 'IDR';
-                        shopBankInfo.classList.add('hidden');
                         bankAccountField.classList.remove('hidden');
-                        transferNoteField.classList.add('hidden');
                         customerBankInput.required = true;
                     }
                     applyFormTexts();
@@ -465,7 +492,6 @@
                             customerName: nameInput.value.trim(),
                             customerPhone: phoneInput.value.trim(),
                             customerBankAccount: customerBankInput.value.trim(),
-                            transferNote: transferNoteInput.value.trim(),
                         }),
                     });
                     const data = await res.json();
@@ -495,6 +521,40 @@
                 dibatalkan: { text: 'statusDibatalkan', hint: 'hintDibatalkan' },
             };
 
+            const renderTicketAction = (d) => {
+                const box = $('ticket-action');
+                const bankBox = $('ticket-action-bank');
+                const title = $('ticket-action-title');
+                const desc = $('ticket-action-desc');
+
+                if (d.status === 'menunggu') {
+                    box.classList.remove('hidden');
+                    box.className = 'text-left rounded-2xl p-4 mb-6 bg-white/[0.03] border border-white/10';
+                    title.className = 'text-[10px] font-black uppercase tracking-widest mb-2 text-zinc-400';
+                    title.textContent = t('actionWaitTitle');
+                    bankBox.classList.add('hidden');
+                    desc.textContent = t('actionWaitDesc');
+                } else if (d.status === 'dipanggil') {
+                    box.classList.remove('hidden');
+                    box.className = 'text-left rounded-2xl p-4 mb-6 bg-blue-500/10 border border-blue-500/30';
+                    title.className = 'text-[10px] font-black uppercase tracking-widest mb-2 text-blue-400';
+                    if (d.type === 'rub_to_idr') {
+                        title.textContent = t('actionCallTitleTransfer');
+                        bankBox.classList.remove('hidden');
+                        $('action-bank-name').textContent = lastShopBank.bankName || '-';
+                        $('action-bank-account').textContent = lastShopBank.accountNumber || '-';
+                        $('action-bank-holder').textContent = lastShopBank.accountHolder ? `${t('atasNama')} ${lastShopBank.accountHolder}` : '';
+                        desc.textContent = t('actionCallDescTransfer');
+                    } else {
+                        title.textContent = t('actionCallTitleCash');
+                        bankBox.classList.add('hidden');
+                        desc.textContent = t('actionCallDescCash');
+                    }
+                } else {
+                    box.classList.add('hidden');
+                }
+            };
+
             const renderTicket = (d) => {
                 lastTicketData = d;
                 $('ticket-number').textContent = d.queueNumber;
@@ -509,6 +569,8 @@
                 badge.className = `inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-black uppercase tracking-widest mb-6 ${colors}`;
                 $('status-text').textContent = t(keys.text);
                 $('ticket-hint').textContent = t(keys.hint);
+
+                renderTicketAction(d);
 
                 const newBtn = $('new-ticket-btn');
                 if (d.status === 'selesai' || d.status === 'dibatalkan') {
