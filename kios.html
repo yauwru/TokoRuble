@@ -149,6 +149,7 @@
                         <span id="amount-currency" class="text-zinc-500 text-xs font-black">RUB</span>
                     </div>
                     <p id="estimate-text" class="text-[11px] text-zinc-500 mt-1.5 ml-1">Estimasi: -</p>
+                    <p id="fee-note" class="hidden text-[10px] text-zinc-600 mt-0.5 ml-1"></p>
                 </div>
 
                 <div id="bank-account-field" class="hidden">
@@ -191,11 +192,16 @@
             <div class="bg-white/[0.03] border border-white/5 rounded-2xl p-5 text-left space-y-3 mb-6">
                 <div class="flex justify-between text-xs"><span id="txt-field-layanan" class="text-zinc-500">Layanan</span><span id="ticket-type" class="text-white font-bold"></span></div>
                 <div class="flex justify-between text-xs"><span id="txt-field-jumlah" class="text-zinc-500">Jumlah</span><span id="ticket-amount" class="text-white font-bold"></span></div>
+                <div id="ticket-fee-row" class="hidden flex justify-between text-xs"><span id="txt-field-fee" class="text-zinc-500">Biaya Layanan</span><span id="ticket-fee" class="text-zinc-300 font-bold"></span></div>
                 <div class="flex justify-between text-xs"><span id="txt-field-estimasi" class="text-zinc-500">Estimasi Diterima</span><span id="ticket-result" class="text-green-400 font-black"></span></div>
                 <div class="flex justify-between text-xs"><span id="txt-field-kurs" class="text-zinc-500">Kurs</span><span id="ticket-rate" class="text-zinc-400 font-mono text-[11px]"></span></div>
             </div>
 
             <div id="ticket-action" class="hidden text-left rounded-2xl p-4 mb-6">
+                <div id="ticket-window-banner" class="hidden text-center mb-3 pb-3 border-b border-white/10">
+                    <p id="txt-window-label" class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Silakan Menuju</p>
+                    <p id="ticket-window-number" class="text-3xl font-black text-blue-400">-</p>
+                </div>
                 <p id="ticket-action-title" class="text-[10px] font-black uppercase tracking-widest mb-2"></p>
                 <div id="ticket-action-bank" class="hidden mb-2">
                     <p class="text-white text-sm font-bold" id="action-bank-name">-</p>
@@ -258,8 +264,12 @@
                 typeLabel2: 'Cash IDR → Kirim RUB',
                 fieldLayanan: 'Layanan',
                 fieldJumlah: 'Jumlah',
+                fieldFee: 'Biaya Layanan',
                 fieldEstimasi: 'Estimasi Diterima',
                 fieldKurs: 'Kurs',
+                feeIncludedLabel: 'Termasuk biaya layanan:',
+                windowLabel: 'Silakan Menuju',
+                windowShort: 'Loket',
                 newTicketBtn: 'Ambil Antrian Baru',
                 statusMenunggu: 'Menunggu Dipanggil',
                 statusDipanggil: 'Sedang Dilayani',
@@ -318,8 +328,12 @@
                 typeLabel2: 'Наличные IDR → Перевод RUB',
                 fieldLayanan: 'Услуга',
                 fieldJumlah: 'Сумма',
+                fieldFee: 'Комиссия',
                 fieldEstimasi: 'Примерно получите',
                 fieldKurs: 'Курс',
+                feeIncludedLabel: 'Включая комиссию:',
+                windowLabel: 'Пожалуйста, подойдите к',
+                windowShort: 'Окно',
                 newTicketBtn: 'Новый номер очереди',
                 statusMenunggu: 'Ожидание вызова',
                 statusDipanggil: 'Вас обслуживают',
@@ -345,6 +359,7 @@
             const formTitle = $('form-title'), formSubtitle = $('form-subtitle');
             const amountInput = $('amount-input'), amountLabel = $('amount-label'), amountCurrency = $('amount-currency');
             const estimateText = $('estimate-text');
+            const feeNote = $('fee-note');
             const bankAccountField = $('bank-account-field'), customerBankInput = $('customer-bank-input');
             const nameInput = $('name-input'), phoneInput = $('phone-input');
             const ticketForm = $('ticket-form'), submitBtn = $('submit-btn'), formError = $('form-error');
@@ -352,6 +367,8 @@
             const howtoToggle = $('howto-toggle'), howtoContent = $('howto-content'), howtoChevron = $('howto-chevron');
 
             let currentRate = 200;
+            let currentFeePercent = 0;
+            let currentFeeFlatIDR = 0;
             let selectedType = null;
             let lastTicketData = null;
             let ticketPollTimer = null;
@@ -374,6 +391,8 @@
                     if (!res.ok) return;
                     const s = await res.json();
                     currentRate = s.rate || 200;
+                    currentFeePercent = s.feePercent || 0;
+                    currentFeeFlatIDR = s.feeFlatIDR || 0;
                     lastShopBank = s;
                     renderRatePreview();
                     updateEstimate();
@@ -381,11 +400,27 @@
                 } catch (e) { /* polling berikutnya akan coba lagi */ }
             };
 
+            const computeResult = (type, amt) => {
+                const baseAmountIDR = type === 'rub_to_idr' ? amt * currentRate : amt;
+                let feeIDR = baseAmountIDR * (currentFeePercent / 100) + currentFeeFlatIDR;
+                feeIDR = Math.min(Math.max(feeIDR, 0), baseAmountIDR);
+                const netIDR = baseAmountIDR - feeIDR;
+                const result = type === 'rub_to_idr' ? netIDR : netIDR / currentRate;
+                return { result, feeIDR };
+            };
+
             const updateEstimate = () => {
                 const amt = parseFloat(amountInput.value) || 0;
-                if (!amt) { estimateText.textContent = t('estimateNone'); return; }
-                const resultText = selectedType === 'rub_to_idr' ? formatIDR(amt * currentRate) : `${formatNum(amt / currentRate, 2)} RUB`;
+                if (!amt) { estimateText.textContent = t('estimateNone'); feeNote.classList.add('hidden'); return; }
+                const { result, feeIDR } = computeResult(selectedType, amt);
+                const resultText = selectedType === 'rub_to_idr' ? formatIDR(result) : `${formatNum(result, 2)} RUB`;
                 estimateText.textContent = `${t('estimateReceiveLabel')} ${resultText}`;
+                if (feeIDR > 0) {
+                    feeNote.textContent = `${t('feeIncludedLabel')} ${formatIDR(feeIDR)}`;
+                    feeNote.classList.remove('hidden');
+                } else {
+                    feeNote.classList.add('hidden');
+                }
             };
             amountInput.addEventListener('input', updateEstimate);
 
@@ -433,6 +468,7 @@
                 $('txt-ticket-number-label').textContent = t('ticketNumberLabel');
                 $('txt-field-layanan').textContent = t('fieldLayanan');
                 $('txt-field-jumlah').textContent = t('fieldJumlah');
+                $('txt-field-fee').textContent = t('fieldFee');
                 $('txt-field-estimasi').textContent = t('fieldEstimasi');
                 $('txt-field-kurs').textContent = t('fieldKurs');
                 $('new-ticket-btn').textContent = t('newTicketBtn');
@@ -544,6 +580,14 @@
                     box.classList.remove('hidden');
                     box.className = 'text-left rounded-2xl p-4 mb-6 bg-blue-500/10 border border-blue-500/30';
                     title.className = 'text-[10px] font-black uppercase tracking-widest mb-2 text-blue-400';
+                    const windowBanner = $('ticket-window-banner');
+                    if (d.windowNumber) {
+                        $('txt-window-label').textContent = t('windowLabel');
+                        $('ticket-window-number').textContent = `${t('windowShort')} ${d.windowNumber}`;
+                        windowBanner.classList.remove('hidden');
+                    } else {
+                        windowBanner.classList.add('hidden');
+                    }
                     if (d.type === 'rub_to_idr') {
                         title.textContent = t('actionCallTitleTransfer');
                         bankBox.classList.remove('hidden');
@@ -566,6 +610,13 @@
                 $('ticket-number').textContent = d.queueNumber;
                 $('ticket-type').textContent = d.type === 'rub_to_idr' ? t('typeLabel1') : t('typeLabel2');
                 $('ticket-amount').textContent = d.type === 'rub_to_idr' ? `${formatNum(d.amount, 2)} RUB` : formatIDR(d.amount);
+                const feeRow = $('ticket-fee-row');
+                if (d.feeIDR > 0) {
+                    $('ticket-fee').textContent = formatIDR(d.feeIDR);
+                    feeRow.classList.remove('hidden');
+                } else {
+                    feeRow.classList.add('hidden');
+                }
                 $('ticket-result').textContent = d.type === 'rub_to_idr' ? formatIDR(d.estimatedResult) : `${formatNum(d.estimatedResult, 2)} RUB`;
                 $('ticket-rate').textContent = `1 RUB = ${formatNum(d.rate, 2)} IDR`;
 

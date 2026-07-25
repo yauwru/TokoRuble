@@ -1,4 +1,4 @@
-const { getSettings, nextQueueNumber, createTicket, listTodayTickets, deleteTickets } = require('../_lib/store');
+const { getSettings, nextQueueNumber, createTicket, listTodayTickets, deleteTickets, getCustomer } = require('../_lib/store');
 const { notifyTelegram } = require('../_lib/telegram');
 const { isAuthed } = require('../_lib/auth');
 const { formatIDR, formatNum, escapeHTML } = require('../_lib/format');
@@ -24,13 +24,35 @@ module.exports = async (req, res) => {
 
     const settings = await getSettings();
     const rate = settings.rate || 200;
-    const estimatedResult = type === 'rub_to_idr' ? amt * rate : amt / rate;
+
+    const customer = await getCustomer(customerPhone);
+    const previousTxCount = (customer && customer.totalTx) || 0;
+
+    let feePercent = settings.feePercent || 0;
+    const feeFlatIDR = settings.feeFlatIDR || 0;
+    let loyaltyApplied = false;
+    if (settings.loyaltyThreshold > 0 && previousTxCount >= settings.loyaltyThreshold) {
+      feePercent = Math.max(0, feePercent - (settings.loyaltyDiscountPercent || 0));
+      loyaltyApplied = true;
+    }
+
+    const baseAmountIDR = type === 'rub_to_idr' ? amt * rate : amt;
+    let feeIDR = baseAmountIDR * (feePercent / 100) + feeFlatIDR;
+    feeIDR = Math.min(Math.max(feeIDR, 0), baseAmountIDR);
+    const netIDR = baseAmountIDR - feeIDR;
+    const estimatedResult = type === 'rub_to_idr' ? netIDR : netIDR / rate;
+
     const queueNumber = await nextQueueNumber(type);
 
     const ticket = await createTicket({
       queueNumber,
       type,
       amount: amt,
+      baseAmountIDR,
+      feeIDR,
+      feePercent,
+      loyaltyApplied,
+      previousTxCount,
       estimatedResult,
       rate,
       customerName: String(customerName).trim().slice(0, 100),
@@ -42,10 +64,11 @@ module.exports = async (req, res) => {
     const label = type === 'rub_to_idr' ? 'Transfer RUB → Cash IDR' : 'Cash IDR → Kirim RUB';
     const resultText = type === 'rub_to_idr' ? formatIDR(estimatedResult) : `${formatNum(estimatedResult, 2)} RUB`;
     const amountText = type === 'rub_to_idr' ? `${formatNum(amt, 2)} RUB` : formatIDR(amt);
+    const loyaltyText = loyaltyApplied ? ` (pelanggan ke-${previousTxCount + 1}, diskon loyalitas)` : (previousTxCount > 0 ? ` (pelanggan ke-${previousTxCount + 1})` : ' (pelanggan baru)');
     notifyTelegram(
       `🎟️ <b>ANTRIAN KIOS BARU: ${ticket.queueNumber}</b>\n---------------------------\n` +
-      `👤 ${escapeHTML(ticket.customerName)} (${escapeHTML(ticket.customerPhone)})\n` +
-      `📋 Layanan: ${label}\n💰 Jumlah: ${amountText}\n➡️ Estimasi Terima: ${resultText}\n` +
+      `👤 ${escapeHTML(ticket.customerName)} (${escapeHTML(ticket.customerPhone)})${loyaltyText}\n` +
+      `📋 Layanan: ${label}\n💰 Jumlah: ${amountText}\n💵 Fee: ${formatIDR(feeIDR)}\n➡️ Estimasi Terima: ${resultText}\n` +
       `---------------------------\nBuka dashboard kios untuk melayani.`
     );
 

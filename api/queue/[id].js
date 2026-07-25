@@ -1,4 +1,4 @@
-const { getTicket, updateTicket } = require('../_lib/store');
+const { getTicket, updateTicket, recordCompletedTransaction } = require('../_lib/store');
 const { isAuthed } = require('../_lib/auth');
 
 module.exports = async (req, res) => {
@@ -12,15 +12,24 @@ module.exports = async (req, res) => {
 
   if (req.method === 'PATCH') {
     if (!isAuthed(req)) return res.status(401).json({ error: 'Unauthorized' });
-    const { status } = req.body || {};
+    const { status, windowNumber } = req.body || {};
     if (!['menunggu', 'dipanggil', 'selesai', 'dibatalkan'].includes(status)) {
       return res.status(400).json({ error: 'Status tidak valid' });
     }
     const patch = { status };
-    if (status === 'dipanggil') patch.calledAt = Date.now();
+    if (status === 'dipanggil') {
+      patch.calledAt = Date.now();
+      if (windowNumber !== undefined) {
+        const w = Number(windowNumber);
+        if (Number.isFinite(w) && w > 0) patch.windowNumber = Math.floor(w);
+      }
+    }
     if (status === 'selesai' || status === 'dibatalkan') patch.completedAt = Date.now();
     const updated = await updateTicket(id, patch);
     if (!updated) return res.status(404).json({ error: 'Antrian tidak ditemukan' });
+    if (status === 'selesai') {
+      try { await recordCompletedTransaction(updated); } catch (e) { /* loyalitas opsional, tidak boleh gagalkan update status */ }
+    }
     return res.status(200).json(updated);
   }
 

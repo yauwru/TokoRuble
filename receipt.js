@@ -8,8 +8,10 @@ const RECEIPT_I18N = {
         name: 'Nama',
         phone: 'No. HP',
         paid: 'Jumlah Dibayar',
+        fee: 'Biaya Layanan',
         received: 'Jumlah Diterima',
         rate: 'Kurs',
+        window: 'Loket',
         status: 'Status',
         statusSelesai: 'SELESAI',
         statusDibatalkan: 'DIBATALKAN',
@@ -26,8 +28,10 @@ const RECEIPT_I18N = {
         name: 'Имя',
         phone: 'Телефон',
         paid: 'Сумма оплаты',
+        fee: 'Комиссия',
         received: 'Сумма получения',
         rate: 'Курс',
+        window: 'Окно',
         status: 'Статус',
         statusSelesai: 'ЗАВЕРШЕНО',
         statusDibatalkan: 'ОТМЕНЕНО',
@@ -63,17 +67,20 @@ function receiptFields(ticket, lang) {
     const paidText = isRubToIdr ? `${receiptFormatNum(ticket.amount, 2)} RUB` : receiptFormatIDR(ticket.amount);
     const receivedText = isRubToIdr ? receiptFormatIDR(ticket.estimatedResult) : `${receiptFormatNum(ticket.estimatedResult, 2)} RUB`;
     const statusText = ticket.status === 'dibatalkan' ? t('statusDibatalkan') : t('statusSelesai');
-    return [
+    const fields = [
         [t('queueNumber'), ticket.queueNumber],
         [t('date'), receiptFormatDate(ticket.completedAt || ticket.createdAt)],
         [t('service'), isRubToIdr ? t('typeLabel1') : t('typeLabel2')],
         [t('name'), ticket.customerName || '-'],
         [t('phone'), ticket.customerPhone || '-'],
         [t('paid'), paidText],
-        [t('received'), receivedText],
-        [t('rate'), `1 RUB = ${receiptFormatNum(ticket.rate, 2)} IDR`],
-        [t('status'), statusText],
     ];
+    if (ticket.feeIDR) fields.push([t('fee'), receiptFormatIDR(ticket.feeIDR)]);
+    fields.push([t('received'), receivedText]);
+    fields.push([t('rate'), `1 RUB = ${receiptFormatNum(ticket.rate, 2)} IDR`]);
+    if (ticket.windowNumber) fields.push([t('window'), String(ticket.windowNumber)]);
+    fields.push([t('status'), statusText]);
+    return fields;
 }
 
 function generateReceiptPDF(ticket, lang) {

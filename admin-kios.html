@@ -82,6 +82,7 @@
                 <p class="text-zinc-500 text-xs font-mono" id="rate-display">Kurs: -</p>
             </div>
             <div class="flex gap-2">
+                <button id="window-pill" class="glass-card px-4 py-2.5 text-xs font-bold text-blue-300">🪟 Loket: -</button>
                 <button id="settings-btn" class="glass-card px-4 py-2.5 text-xs font-bold text-white">⚙️ Pengaturan</button>
                 <button id="logout-btn" class="glass-card px-4 py-2.5 text-xs font-bold text-red-400">Keluar</button>
             </div>
@@ -117,6 +118,37 @@
                     <button id="print-qr-btn" class="glass-card px-4 py-2 text-[11px] font-bold text-white mt-3">🖨️ Cetak QR</button>
                 </div>
             </div>
+
+            <div class="grid md:grid-cols-3 gap-6 mt-8 pt-6 border-t border-white/5">
+                <div>
+                    <h3 class="text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Biaya Transaksi</h3>
+                    <p class="text-zinc-600 text-[11px] mb-3">Dipotong dari nominal yang diterima customer (sisi IDR). Kosongkan/0 kalau tidak mau ambil fee.</p>
+                    <form id="fee-form" class="space-y-3">
+                        <div class="input-glass px-3"><input type="number" step="any" min="0" max="100" id="fee-percent-input" placeholder="Fee (%) — mis. 2" class="w-full bg-transparent py-2.5 text-white text-sm outline-none placeholder-zinc-600"></div>
+                        <div class="input-glass px-3"><input type="number" step="any" min="0" id="fee-flat-input" placeholder="Fee Tetap (IDR) — mis. 5000" class="w-full bg-transparent py-2.5 text-white text-sm outline-none placeholder-zinc-600"></div>
+                        <button type="submit" class="primary-btn text-white font-black py-2.5 px-5 rounded-xl text-[11px] uppercase tracking-widest">Simpan</button>
+                        <span id="fee-saved-msg" class="text-green-400 text-[11px] font-bold ml-2 hidden">Tersimpan ✓</span>
+                    </form>
+                </div>
+                <div>
+                    <h3 class="text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Loyalitas Pelanggan</h3>
+                    <p class="text-zinc-600 text-[11px] mb-3">Pelanggan yang sudah transaksi sejumlah ini otomatis dapat potongan fee.</p>
+                    <form id="loyalty-form" class="space-y-3">
+                        <div class="input-glass px-3"><input type="number" step="1" min="0" id="loyalty-threshold-input" placeholder="Min. transaksi — mis. 3" class="w-full bg-transparent py-2.5 text-white text-sm outline-none placeholder-zinc-600"></div>
+                        <div class="input-glass px-3"><input type="number" step="any" min="0" max="100" id="loyalty-discount-input" placeholder="Diskon fee (%) — mis. 1" class="w-full bg-transparent py-2.5 text-white text-sm outline-none placeholder-zinc-600"></div>
+                        <button type="submit" class="primary-btn text-white font-black py-2.5 px-5 rounded-xl text-[11px] uppercase tracking-widest">Simpan</button>
+                        <span id="loyalty-saved-msg" class="text-green-400 text-[11px] font-bold ml-2 hidden">Tersimpan ✓</span>
+                    </form>
+                </div>
+                <div>
+                    <h3 class="text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Jumlah Loket</h3>
+                    <p class="text-zinc-600 text-[11px] mb-3">Berapa loket/konter yang aktif melayani secara bersamaan.</p>
+                    <form id="windows-form" class="flex gap-2">
+                        <div class="input-glass px-3 flex-1"><input type="number" step="1" min="1" max="20" id="total-windows-input" placeholder="mis. 2" class="w-full bg-transparent py-2.5 text-white text-sm outline-none placeholder-zinc-600"></div>
+                        <button type="submit" class="primary-btn text-white font-black py-2.5 px-4 rounded-xl text-[11px] uppercase tracking-widest">Simpan</button>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <!-- BOARD -->
@@ -141,6 +173,14 @@
 
     <div id="print-area" class="hidden fixed"></div>
 
+    <div id="window-select-overlay" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+        <div class="glass-card p-8 w-full max-w-sm text-center">
+            <h2 class="text-lg font-black text-white mb-1">Pilih Loket Anda</h2>
+            <p class="text-zinc-500 text-xs mb-6">Customer akan diarahkan ke loket ini saat Anda memanggil nomor antrian.</p>
+            <div id="window-select-buttons" class="grid grid-cols-3 gap-3"></div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
     <script src="receipt.js"></script>
     <script>
@@ -153,6 +193,8 @@
             let knownWaitingIds = new Set();
             let boardPollTimer = null;
             let firstBoardLoad = true;
+            let currentSettings = {};
+            let myWindowNumber = parseInt(localStorage.getItem('tokoruble_admin_window'), 10) || null;
 
             const formatIDR = (v) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(v || 0);
             const formatNum = (v, d = 2) => new Intl.NumberFormat('id-ID', { minimumFractionDigits: d, maximumFractionDigits: d }).format(v || 0);
@@ -189,6 +231,35 @@
                     openReceiptPrintWindow(ticket);
                 } catch (e) { console.error('Gagal membuka jendela cetak', e); }
             };
+
+            // ---- WINDOW (LOKET) ASSIGNMENT ----
+            const renderWindowPill = () => {
+                $('window-pill').textContent = myWindowNumber ? `🪟 Loket: ${myWindowNumber}` : '🪟 Loket: -';
+            };
+
+            const closeWindowSelector = () => $('window-select-overlay').classList.add('hidden');
+
+            const openWindowSelector = () => {
+                const total = Math.max(1, currentSettings.totalWindows || 1);
+                const container = $('window-select-buttons');
+                container.innerHTML = '';
+                for (let i = 1; i <= total; i++) {
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.textContent = i;
+                    btn.className = 'primary-btn text-white font-black py-4 rounded-xl text-lg';
+                    btn.addEventListener('click', () => {
+                        myWindowNumber = i;
+                        localStorage.setItem('tokoruble_admin_window', String(i));
+                        renderWindowPill();
+                        closeWindowSelector();
+                    });
+                    container.appendChild(btn);
+                }
+                $('window-select-overlay').classList.remove('hidden');
+            };
+
+            $('window-pill').addEventListener('click', openWindowSelector);
 
             // ---- AUTH ----
             const showDashboard = () => {
@@ -238,11 +309,24 @@
                 const res = await fetch('/api/settings');
                 if (!res.ok) return;
                 const s = await res.json();
+                currentSettings = s;
                 $('rate-display').textContent = `Kurs: 1 RUB = ${formatNum(s.rate || 200, 2)} IDR`;
                 $('rate-input').value = s.rate || '';
                 $('bank-name-input').value = s.bankName || '';
                 $('bank-account-input').value = s.accountNumber || '';
                 $('bank-holder-input').value = s.accountHolder || '';
+                $('fee-percent-input').value = s.feePercent || '';
+                $('fee-flat-input').value = s.feeFlatIDR || '';
+                $('loyalty-threshold-input').value = s.loyaltyThreshold || '';
+                $('loyalty-discount-input').value = s.loyaltyDiscountPercent || '';
+                $('total-windows-input').value = s.totalWindows || 1;
+
+                const total = Math.max(1, s.totalWindows || 1);
+                if (!myWindowNumber || myWindowNumber > total) {
+                    openWindowSelector();
+                } else {
+                    renderWindowPill();
+                }
             };
 
             $('rate-form').addEventListener('submit', async (e) => {
@@ -273,6 +357,49 @@
                 setTimeout(() => msg.classList.add('hidden'), 2000);
             });
 
+            $('fee-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        feePercent: parseFloat($('fee-percent-input').value) || 0,
+                        feeFlatIDR: parseFloat($('fee-flat-input').value) || 0,
+                    }),
+                });
+                const msg = $('fee-saved-msg');
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 2000);
+                loadSettings();
+            });
+
+            $('loyalty-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        loyaltyThreshold: parseInt($('loyalty-threshold-input').value, 10) || 0,
+                        loyaltyDiscountPercent: parseFloat($('loyalty-discount-input').value) || 0,
+                    }),
+                });
+                const msg = $('loyalty-saved-msg');
+                msg.classList.remove('hidden');
+                setTimeout(() => msg.classList.add('hidden'), 2000);
+                loadSettings();
+            });
+
+            $('windows-form').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const total = parseInt($('total-windows-input').value, 10) || 1;
+                await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ totalWindows: total }),
+                });
+                loadSettings();
+            });
+
             // ---- QR CODE ----
             const kiosURL = new URL('kios.html', window.location.href).toString();
             $('kios-url').textContent = kiosURL;
@@ -291,9 +418,14 @@
                 const typeLabel = d.type === 'rub_to_idr' ? 'Transfer RUB → Cash IDR' : 'Cash IDR → Kirim RUB';
                 const amountText = d.type === 'rub_to_idr' ? `${formatNum(d.amount, 2)} RUB` : formatIDR(d.amount);
                 const resultText = d.type === 'rub_to_idr' ? formatIDR(d.estimatedResult) : `${formatNum(d.estimatedResult, 2)} RUB`;
+                const feeRow = d.feeIDR ? `<div class="text-[11px] text-zinc-400">Fee: <span class="text-white font-bold">${formatIDR(d.feeIDR)}</span></div>` : '';
                 const extra = d.type === 'idr_to_rub'
                     ? `<div class="text-[11px] text-zinc-400 mt-1">Rek. tujuan: <span class="text-white font-mono">${escapeHTML(d.customerBankAccount)}</span></div>`
                     : (d.transferNote ? `<div class="text-[11px] text-zinc-400 mt-1">Catatan: <span class="text-white">${escapeHTML(d.transferNote)}</span></div>` : '');
+                const loyaltyBadge = d.previousTxCount > 0
+                    ? `<span class="text-[9px] font-black text-blue-400 bg-blue-500/10 border border-blue-500/30 rounded-full px-2 py-0.5">🔁 Ke-${d.previousTxCount + 1}${d.loyaltyApplied ? ' · Diskon' : ''}</span>`
+                    : `<span class="text-[9px] font-black text-zinc-500 bg-white/5 border border-white/10 rounded-full px-2 py-0.5">✨ Baru</span>`;
+                const windowBadge = d.windowNumber ? `<span class="text-[9px] font-black text-orange-400 bg-orange-500/10 border border-orange-500/30 rounded-full px-2 py-0.5">🪟 Loket ${d.windowNumber}</span>` : '';
 
                 let actions = '';
                 if (d.status === 'menunggu') {
@@ -310,9 +442,11 @@
                         <span class="text-xl font-black text-white">${escapeHTML(d.queueNumber)}</span>
                         <span class="text-[9px] text-zinc-600 font-mono">${d.createdAt ? new Date(d.createdAt).toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'}) : ''}</span>
                     </div>
+                    <div class="flex items-center gap-1.5 flex-wrap mb-1.5">${loyaltyBadge}${windowBadge}</div>
                     <p class="text-[11px] font-bold text-orange-400 uppercase tracking-wide">${typeLabel}</p>
                     <p class="text-white text-sm font-black mt-1">${escapeHTML(d.customerName)} <span class="text-zinc-500 font-normal">· ${escapeHTML(d.customerPhone)}</span></p>
                     <div class="text-[11px] text-zinc-400 mt-2">Bayar: <span class="text-white font-bold">${amountText}</span></div>
+                    ${feeRow}
                     <div class="text-[11px] text-zinc-400">Terima: <span class="text-green-400 font-bold">${resultText}</span></div>
                     ${extra}
                     ${actions ? `<div class="grid grid-cols-2 gap-2 mt-3">${actions}</div>` : ''}
@@ -363,11 +497,17 @@
                         const btn = e.target.closest('.action-btn');
                         if (!btn) return;
                         const id = btn.dataset.id, action = btn.dataset.action;
+                        if (action === 'dipanggil' && !myWindowNumber) {
+                            openWindowSelector();
+                            return;
+                        }
                         btn.disabled = true;
+                        const patchBody = { status: action };
+                        if (action === 'dipanggil') patchBody.windowNumber = myWindowNumber;
                         const res = await fetch(`/api/queue/${id}`, {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ status: action }),
+                            body: JSON.stringify(patchBody),
                         });
                         if (res.ok && (action === 'selesai' || action === 'dibatalkan')) {
                             const updatedTicket = await res.json();

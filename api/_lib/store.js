@@ -14,9 +14,21 @@ function dayRangeWIB(dateStr) {
   return { start, end };
 }
 
+const DEFAULT_SETTINGS = {
+  rate: 200,
+  bankName: '',
+  accountNumber: '',
+  accountHolder: '',
+  feePercent: 0,
+  feeFlatIDR: 0,
+  loyaltyThreshold: 0,
+  loyaltyDiscountPercent: 0,
+  totalWindows: 1,
+};
+
 async function getSettings() {
   const s = await kv.get(SETTINGS_KEY);
-  return s || { rate: 200, bankName: '', accountNumber: '', accountHolder: '' };
+  return { ...DEFAULT_SETTINGS, ...(s || {}) };
 }
 
 async function setSettings(patch) {
@@ -69,7 +81,35 @@ async function deleteTickets(ids) {
   await kv.zrem(QUEUE_INDEX_KEY, ...ids);
 }
 
+function normalizePhone(phone) {
+  return String(phone || '').replace(/\D/g, '');
+}
+
+async function getCustomer(phone) {
+  const key = normalizePhone(phone);
+  if (!key) return null;
+  return kv.get(`kios:customer:${key}`);
+}
+
+async function recordCompletedTransaction(ticket) {
+  const key = normalizePhone(ticket.customerPhone);
+  if (!key) return null;
+  const current = await kv.get(`kios:customer:${key}`);
+  const volumeIDR = ticket.type === 'rub_to_idr' ? (ticket.baseAmountIDR || 0) : (ticket.amount || 0);
+  const updated = {
+    phone: ticket.customerPhone,
+    name: ticket.customerName || (current && current.name) || '',
+    totalTx: ((current && current.totalTx) || 0) + 1,
+    totalVolumeIDR: ((current && current.totalVolumeIDR) || 0) + volumeIDR,
+    firstSeen: (current && current.firstSeen) || ticket.createdAt,
+    lastSeen: Date.now(),
+  };
+  await kv.set(`kios:customer:${key}`, updated);
+  return updated;
+}
+
 module.exports = {
   todayWIB, getSettings, setSettings, nextQueueNumber,
   createTicket, getTicket, updateTicket, listTodayTickets, deleteTickets,
+  normalizePhone, getCustomer, recordCompletedTransaction,
 };
