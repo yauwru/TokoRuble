@@ -168,17 +168,26 @@
                 } catch (e) { /* audio tidak wajib */ }
             };
 
+            const openReceiptPrintWindow = (ticket) => {
+                const html = renderReceiptPrintHTML(ticket, 'id');
+                const left = Math.max(0, (window.screen.width || 1200) - 420);
+                const w = window.open('', 'TokoRubleReceiptPrint', `width=380,height=640,left=${left},top=80`);
+                if (!w) {
+                    console.warn('Popup bukti transaksi diblokir browser. Izinkan popup untuk situs ini agar cetak otomatis berfungsi.');
+                    return;
+                }
+                w.document.open();
+                w.document.write(`<!DOCTYPE html><html><head><title>Bukti Transaksi</title><style>body{margin:16px;font-family:sans-serif;background:#fff;}</style></head><body>${html}<script>window.onload=function(){window.print();};<\/script></body></html>`);
+                w.document.close();
+            };
+
             const handleReceiptForTicket = (ticket) => {
                 try {
                     downloadReceiptPDF(ticket, 'id');
                 } catch (e) { console.error('Gagal membuat PDF bukti transaksi', e); }
                 try {
-                    const area = $('print-area');
-                    area.innerHTML = renderReceiptPrintHTML(ticket, 'id');
-                    area.classList.remove('hidden');
-                    window.print();
-                    area.classList.add('hidden');
-                } catch (e) { console.error('Gagal membuka dialog cetak', e); }
+                    openReceiptPrintWindow(ticket);
+                } catch (e) { console.error('Gagal membuka jendela cetak', e); }
             };
 
             // ---- AUTH ----
