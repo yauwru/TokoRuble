@@ -141,6 +141,8 @@
 
     <div id="print-area" class="hidden fixed"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+    <script src="receipt.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const $ = (id) => document.getElementById(id);
@@ -164,6 +166,19 @@
                     osc.frequency.value = 880; gain.gain.value = 0.15;
                     osc.start(); osc.stop(audioCtx.currentTime + 0.18);
                 } catch (e) { /* audio tidak wajib */ }
+            };
+
+            const handleReceiptForTicket = (ticket) => {
+                try {
+                    downloadReceiptPDF(ticket, 'id');
+                } catch (e) { console.error('Gagal membuat PDF bukti transaksi', e); }
+                try {
+                    const area = $('print-area');
+                    area.innerHTML = renderReceiptPrintHTML(ticket, 'id');
+                    area.classList.remove('hidden');
+                    window.print();
+                    area.classList.add('hidden');
+                } catch (e) { console.error('Gagal membuka dialog cetak', e); }
             };
 
             // ---- AUTH ----
@@ -340,11 +355,15 @@
                         if (!btn) return;
                         const id = btn.dataset.id, action = btn.dataset.action;
                         btn.disabled = true;
-                        await fetch(`/api/queue/${id}`, {
+                        const res = await fetch(`/api/queue/${id}`, {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ status: action }),
                         });
+                        if (res.ok && (action === 'selesai' || action === 'dibatalkan')) {
+                            const updatedTicket = await res.json();
+                            handleReceiptForTicket(updatedTicket);
+                        }
                         loadBoard();
                     });
 

@@ -207,11 +207,14 @@
 
             <p id="ticket-hint" class="text-zinc-400 text-xs leading-relaxed mb-6">Silakan tunggu, staf kami akan memanggil nomor Anda.</p>
 
+            <button id="download-receipt-btn" class="hidden w-full primary-btn text-white font-black py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em] mb-3">Unduh Bukti Transaksi (PDF)</button>
             <button id="new-ticket-btn" class="hidden w-full bg-white/5 border border-white/10 text-white font-black py-3.5 rounded-2xl text-xs uppercase tracking-[0.2em]">Ambil Antrian Baru</button>
         </div>
 
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+    <script src="receipt.js"></script>
     <script>
         const I18N = {
             id: {
@@ -272,6 +275,7 @@
                 actionCallDescTransfer: 'Transfer ke rekening di atas, lalu tunjukkan bukti transfer ke petugas kami.',
                 actionCallTitleCash: 'Silakan Serahkan Uang Cash',
                 actionCallDescCash: 'Serahkan uang cash sejumlah di atas kepada petugas kami sekarang.',
+                downloadReceiptBtn: 'Unduh Bukti Transaksi (PDF)',
             },
             ru: {
                 kiosWord: 'Киоск',
@@ -331,6 +335,7 @@
                 actionCallDescTransfer: 'Переведите на счёт выше, затем покажите подтверждение перевода нашему сотруднику.',
                 actionCallTitleCash: 'Передайте наличные сейчас',
                 actionCallDescCash: 'Передайте указанную выше сумму наличными нашему сотруднику сейчас.',
+                downloadReceiptBtn: 'Скачать чек (PDF)',
             },
         };
 
@@ -431,6 +436,7 @@
                 $('txt-field-estimasi').textContent = t('fieldEstimasi');
                 $('txt-field-kurs').textContent = t('fieldKurs');
                 $('new-ticket-btn').textContent = t('newTicketBtn');
+                $('download-receipt-btn').textContent = t('downloadReceiptBtn');
                 renderRatePreview();
                 applyFormTexts();
                 if (lastTicketData) renderTicket(lastTicketData);
@@ -573,11 +579,14 @@
                 renderTicketAction(d);
 
                 const newBtn = $('new-ticket-btn');
+                const downloadBtn = $('download-receipt-btn');
                 if (d.status === 'selesai' || d.status === 'dibatalkan') {
                     newBtn.classList.remove('hidden');
+                    downloadBtn.classList.remove('hidden');
                     if (ticketPollTimer) { clearInterval(ticketPollTimer); ticketPollTimer = null; }
                 } else {
                     newBtn.classList.add('hidden');
+                    downloadBtn.classList.add('hidden');
                     if (d.status === 'dipanggil' && navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 }
             };
@@ -608,6 +617,13 @@
                 if (ticketPollTimer) { clearInterval(ticketPollTimer); ticketPollTimer = null; }
                 lastTicketData = null;
                 showScreen(screenSelect);
+            });
+
+            $('download-receipt-btn').addEventListener('click', () => {
+                if (!lastTicketData) return;
+                try {
+                    downloadReceiptPDF(lastTicketData, lang);
+                } catch (e) { console.error('Gagal membuat PDF', e); }
             });
 
             setLang(lang);
