@@ -24,6 +24,9 @@ const DEFAULT_SETTINGS = {
   loyaltyThreshold: 0,
   loyaltyDiscountPercent: 0,
   totalWindows: 1,
+  shopOpen: true,
+  stockIdrEmpty: false,
+  stockRubEmpty: false,
 };
 
 async function getSettings() {

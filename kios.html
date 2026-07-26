@@ -90,6 +90,13 @@
             <p id="txt-subtitle" class="text-zinc-500 text-xs uppercase tracking-[0.2em] font-bold mt-1">Ambil Nomor Antrian</p>
         </div>
 
+        <!-- SCREEN 0: TOKO TUTUP -->
+        <div id="screen-closed" class="glass-card p-8 fade-in hidden text-center">
+            <div class="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center mx-auto mb-4 text-2xl">🔒</div>
+            <p id="txt-closed-title" class="text-white font-black text-lg mb-2">Toko Sedang Tutup</p>
+            <p id="txt-closed-desc" class="text-zinc-500 text-xs leading-relaxed">Silakan datang kembali saat jam operasional TokoRuble buka.</p>
+        </div>
+
         <!-- SCREEN 1: PILIH LAYANAN -->
         <div id="screen-select" class="glass-card p-6 fade-in">
             <p id="txt-choose-service" class="text-center text-zinc-300 text-sm font-semibold mb-5">Pilih layanan yang Anda butuhkan</p>
@@ -100,10 +107,11 @@
                         <span class="text-orange-400 text-sm my-0.5">&rarr;</span>
                         <span class="text-[10px] font-black text-orange-400">IDR</span>
                     </div>
-                    <div>
+                    <div class="flex-1">
                         <p id="txt-service1-title" class="font-black text-white text-sm">Transfer Rubel, Terima Rupiah</p>
                         <p id="txt-service1-desc" class="text-zinc-500 text-xs mt-0.5">Kirim RUB ke rekening kami, ambil cash IDR</p>
                     </div>
+                    <span id="badge-stock-1" class="hidden text-[8px] font-black text-red-400 bg-red-500/10 border border-red-500/30 rounded-full px-2 py-1 uppercase tracking-widest shrink-0">Stok Habis</span>
                 </button>
                 <button data-type="idr_to_rub" class="service-btn service-card w-full text-left p-5 flex items-center gap-4">
                     <div class="w-14 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex flex-col items-center justify-center shrink-0 leading-none">
@@ -111,10 +119,11 @@
                         <span class="text-blue-400 text-sm my-0.5">&rarr;</span>
                         <span class="text-[10px] font-black text-blue-400">RUB</span>
                     </div>
-                    <div>
+                    <div class="flex-1">
                         <p id="txt-service2-title" class="font-black text-white text-sm">Bayar Rupiah Cash, Terima Rubel</p>
                         <p id="txt-service2-desc" class="text-zinc-500 text-xs mt-0.5">Bayar IDR cash, RUB kami kirim ke rekening Anda</p>
                     </div>
+                    <span id="badge-stock-2" class="hidden text-[8px] font-black text-red-400 bg-red-500/10 border border-red-500/30 rounded-full px-2 py-1 uppercase tracking-widest shrink-0">Stok Habis</span>
                 </button>
             </div>
             <p id="rate-preview" class="text-center text-zinc-600 text-[11px] mt-5 font-mono"></p>
@@ -285,6 +294,9 @@
                 actionCallTitleCash: 'Silakan Serahkan Uang Cash',
                 actionCallDescCash: 'Serahkan uang cash sejumlah di atas kepada petugas kami sekarang.',
                 downloadReceiptBtn: 'Cetak / Simpan Bukti (PDF)',
+                closedTitle: 'Toko Sedang Tutup',
+                closedDesc: 'Silakan datang kembali saat jam operasional TokoRuble buka.',
+                stockEmptyBadge: 'Stok Habis',
             },
             ru: {
                 kiosWord: 'Киоск',
@@ -349,12 +361,17 @@
                 actionCallTitleCash: 'Передайте наличные сейчас',
                 actionCallDescCash: 'Передайте указанную выше сумму наличными нашему сотруднику сейчас.',
                 downloadReceiptBtn: 'Печать / Сохранить чек (PDF)',
+                closedTitle: 'Магазин сейчас закрыт',
+                closedDesc: 'Пожалуйста, приходите в часы работы TokoRuble.',
+                stockEmptyBadge: 'Нет в наличии',
             },
         };
 
         document.addEventListener('DOMContentLoaded', () => {
             const $ = (id) => document.getElementById(id);
-            const screenSelect = $('screen-select'), screenForm = $('screen-form'), screenTicket = $('screen-ticket');
+            const screenSelect = $('screen-select'), screenForm = $('screen-form'), screenTicket = $('screen-ticket'), screenClosed = $('screen-closed');
+            const serviceBtnRubToIdr = document.querySelector('.service-btn[data-type="rub_to_idr"]');
+            const serviceBtnIdrToRub = document.querySelector('.service-btn[data-type="idr_to_rub"]');
             const formTitle = $('form-title'), formSubtitle = $('form-subtitle');
             const amountInput = $('amount-input'), amountLabel = $('amount-label'), amountCurrency = $('amount-currency');
             const estimateText = $('estimate-text');
@@ -374,6 +391,9 @@
             let settingsPollTimer = null;
             let lang = localStorage.getItem('tokoruble_kios_lang') || 'id';
             let lastShopBank = { bankName: '-', accountNumber: '-', accountHolder: '' };
+            let shopOpen = true;
+            let stockIdrEmpty = false;
+            let stockRubEmpty = false;
 
             const t = (key) => (I18N[lang] && I18N[lang][key]) || I18N.id[key] || key;
 
@@ -393,8 +413,12 @@
                     currentFeePercent = s.feePercent || 0;
                     currentFeeFlatIDR = s.feeFlatIDR || 0;
                     lastShopBank = s;
+                    shopOpen = s.shopOpen !== false;
+                    stockIdrEmpty = !!s.stockIdrEmpty;
+                    stockRubEmpty = !!s.stockRubEmpty;
                     renderRatePreview();
                     updateEstimate();
+                    applyShopStatus();
                     if (lastTicketData) renderTicket(lastTicketData);
                 } catch (e) { /* polling berikutnya akan coba lagi */ }
             };
@@ -424,8 +448,22 @@
             amountInput.addEventListener('input', updateEstimate);
 
             const showScreen = (el) => {
-                [screenSelect, screenForm, screenTicket].forEach((s) => s.classList.add('hidden'));
+                [screenSelect, screenForm, screenTicket, screenClosed].forEach((s) => s.classList.add('hidden'));
                 el.classList.remove('hidden');
+            };
+
+            const applyShopStatus = () => {
+                $('badge-stock-1').classList.toggle('hidden', !stockIdrEmpty);
+                $('badge-stock-2').classList.toggle('hidden', !stockRubEmpty);
+                serviceBtnRubToIdr.disabled = stockIdrEmpty;
+                serviceBtnIdrToRub.disabled = stockRubEmpty;
+                serviceBtnRubToIdr.classList.toggle('opacity-40', stockIdrEmpty);
+                serviceBtnIdrToRub.classList.toggle('opacity-40', stockRubEmpty);
+
+                const onLandingOrClosed = screenForm.classList.contains('hidden') && screenTicket.classList.contains('hidden');
+                if (onLandingOrClosed) {
+                    showScreen(shopOpen ? screenSelect : screenClosed);
+                }
             };
 
             const applyFormTexts = () => {
@@ -453,6 +491,10 @@
                 $('txt-service2-title').textContent = t('service2Title');
                 $('txt-service2-desc').textContent = t('service2Desc');
                 $('back-btn').textContent = t('back');
+                $('txt-closed-title').textContent = t('closedTitle');
+                $('txt-closed-desc').textContent = t('closedDesc');
+                $('badge-stock-1').textContent = t('stockEmptyBadge');
+                $('badge-stock-2').textContent = t('stockEmptyBadge');
                 $('txt-howto-title').textContent = t('howToTitle');
                 $('txt-howto-step1').textContent = t('howToStep1');
                 $('txt-howto-step2').textContent = t('howToStep2');

@@ -12,6 +12,7 @@ module.exports = async (req, res) => {
     const {
       bankName, accountNumber, accountHolder, rate,
       feePercent, feeFlatIDR, loyaltyThreshold, loyaltyDiscountPercent, totalWindows,
+      shopOpen, stockIdrEmpty, stockRubEmpty,
     } = req.body || {};
     const patch = {};
     if (bankName !== undefined) patch.bankName = String(bankName).slice(0, 100);
@@ -47,6 +48,9 @@ module.exports = async (req, res) => {
       if (!Number.isFinite(v) || v < 1 || v > 20) return res.status(400).json({ error: 'Jumlah loket tidak valid' });
       patch.totalWindows = Math.floor(v);
     }
+    if (shopOpen !== undefined) patch.shopOpen = Boolean(shopOpen);
+    if (stockIdrEmpty !== undefined) patch.stockIdrEmpty = Boolean(stockIdrEmpty);
+    if (stockRubEmpty !== undefined) patch.stockRubEmpty = Boolean(stockRubEmpty);
     const updated = await setSettings(patch);
     return res.status(200).json(updated);
   }

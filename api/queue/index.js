@@ -23,6 +23,16 @@ module.exports = async (req, res) => {
     }
 
     const settings = await getSettings();
+    if (!settings.shopOpen) {
+      return res.status(400).json({ error: 'Toko sedang tutup. Silakan datang kembali saat jam operasional.' });
+    }
+    if (type === 'rub_to_idr' && settings.stockIdrEmpty) {
+      return res.status(400).json({ error: 'Stok Rupiah sedang habis, layanan ini sementara tidak tersedia.' });
+    }
+    if (type === 'idr_to_rub' && settings.stockRubEmpty) {
+      return res.status(400).json({ error: 'Stok Rubel sedang habis, layanan ini sementara tidak tersedia.' });
+    }
+
     const rate = settings.rate || 200;
 
     const customer = await getCustomer(customerPhone);

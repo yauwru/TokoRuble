@@ -81,7 +81,8 @@
                 <h1 class="text-xl md:text-2xl font-black text-white">Antrian Kios <span class="text-orange-500">TokoRuble</span></h1>
                 <p class="text-zinc-500 text-xs font-mono" id="rate-display">Kurs: -</p>
             </div>
-            <div class="flex gap-2">
+            <div class="flex gap-2 flex-wrap">
+                <button id="shop-status-btn" class="glass-card px-4 py-2.5 text-xs font-bold">🟢 Toko: Buka</button>
                 <button id="window-pill" class="glass-card px-4 py-2.5 text-xs font-bold text-blue-300">🪟 Loket: -</button>
                 <button id="settings-btn" class="glass-card px-4 py-2.5 text-xs font-bold text-white">⚙️ Pengaturan</button>
                 <button id="logout-btn" class="glass-card px-4 py-2.5 text-xs font-bold text-red-400">Keluar</button>
@@ -152,6 +153,14 @@
                     <h3 class="text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Reset Nomor Antrian</h3>
                     <p class="text-zinc-600 text-[11px] mb-3">Nomor antrian otomatis reset ke 001 tiap hari baru. Tombol ini untuk reset manual di tengah hari (mis. testing/kesalahan) — semua antrian hari ini ikut terhapus.</p>
                     <button id="reset-queue-btn" type="button" class="bg-red-500/10 border border-red-500/30 text-red-400 font-black py-2.5 px-5 rounded-xl text-[11px] uppercase tracking-widest">Reset Sekarang</button>
+                </div>
+                <div>
+                    <h3 class="text-xs font-black text-zinc-400 uppercase tracking-widest mb-3">Status Stok</h3>
+                    <p class="text-zinc-600 text-[11px] mb-3">Kalau stok habis, layanan terkait otomatis dinonaktifkan &amp; customer melihat info ini di kios.</p>
+                    <div class="flex gap-2">
+                        <button id="stock-idr-btn" type="button" class="flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest border">Stok IDR</button>
+                        <button id="stock-rub-btn" type="button" class="flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest border">Stok RUB</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -308,6 +317,8 @@
                 $('loyalty-threshold-input').value = s.loyaltyThreshold || '';
                 $('loyalty-discount-input').value = s.loyaltyDiscountPercent || '';
                 $('total-windows-input').value = s.totalWindows || 1;
+                renderShopStatus(s.shopOpen !== false);
+                renderStockButtons(s);
 
                 const total = Math.max(1, s.totalWindows || 1);
                 if (!myWindowNumber || myWindowNumber > total) {
@@ -316,6 +327,48 @@
                     renderWindowPill();
                 }
             };
+
+            const renderShopStatus = (isOpen) => {
+                const btn = $('shop-status-btn');
+                btn.textContent = isOpen ? '🟢 Toko: Buka' : '🔴 Toko: Tutup';
+                btn.className = `glass-card px-4 py-2.5 text-xs font-bold ${isOpen ? 'text-green-400' : 'text-red-400'}`;
+            };
+
+            $('shop-status-btn').addEventListener('click', async () => {
+                const nowOpen = currentSettings.shopOpen !== false;
+                await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shopOpen: !nowOpen }),
+                });
+                loadSettings();
+            });
+
+            const stockBtnClass = (isEmpty) => `flex-1 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest border ${isEmpty ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-green-500/10 border-green-500/30 text-green-400'}`;
+            const renderStockButtons = (s) => {
+                $('stock-idr-btn').className = stockBtnClass(!!s.stockIdrEmpty);
+                $('stock-idr-btn').textContent = s.stockIdrEmpty ? 'Stok IDR: Habis' : 'Stok IDR: Tersedia';
+                $('stock-rub-btn').className = stockBtnClass(!!s.stockRubEmpty);
+                $('stock-rub-btn').textContent = s.stockRubEmpty ? 'Stok RUB: Habis' : 'Stok RUB: Tersedia';
+            };
+
+            $('stock-idr-btn').addEventListener('click', async () => {
+                await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stockIdrEmpty: !currentSettings.stockIdrEmpty }),
+                });
+                loadSettings();
+            });
+
+            $('stock-rub-btn').addEventListener('click', async () => {
+                await fetch('/api/settings', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ stockRubEmpty: !currentSettings.stockRubEmpty }),
+                });
+                loadSettings();
+            });
 
             $('rate-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
