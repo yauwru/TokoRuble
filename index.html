@@ -685,6 +685,56 @@
     </div>
 </div>
 
+<!-- Kalkulator Simulasi Profit -->
+<div class="bg-zinc-950/80 p-8 rounded-[2rem] border border-white/5 mt-6">
+    <p class="text-[10px] font-black text-zinc-500 uppercase text-center mb-2 tracking-[0.4em]">Kalkulator Simulasi Profit</p>
+    <p class="text-zinc-600 text-[10px] text-center mb-6 leading-relaxed px-2">Coba kombinasi kurs & fee untuk lihat estimasi profit per transaksi — bandingkan skenario online vs offline sebelum diterapkan.</p>
+
+    <div class="grid grid-cols-2 gap-3 mb-4">
+        <button type="button" id="calc-dir-i2r" class="calc-dir-btn bg-orange-600 text-white font-black py-3 rounded-xl text-[10px] uppercase tracking-widest transition">IDR &rarr; RUB</button>
+        <button type="button" id="calc-dir-r2i" class="calc-dir-btn bg-zinc-900 text-zinc-400 font-black py-3 rounded-xl text-[10px] uppercase tracking-widest border border-white/10 transition">RUB &rarr; IDR</button>
+    </div>
+
+    <div class="space-y-3">
+        <div>
+            <label id="calc-amount-label" class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Jumlah (IDR)</label>
+            <input type="number" id="calc-amount-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white text-xs mt-1 focus:outline-none focus:border-orange-500" placeholder="1000000">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Kurs Modal / Acuan</label>
+                <input type="number" id="calc-kurs-modal-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white text-xs mt-1 focus:outline-none focus:border-orange-500" placeholder="mis. 195">
+            </div>
+            <div>
+                <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Kurs Dipasang</label>
+                <input type="number" id="calc-kurs-jual-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white text-xs mt-1 focus:outline-none focus:border-orange-500" placeholder="mis. 210">
+            </div>
+        </div>
+        <button type="button" id="calc-fill-rate-btn" class="text-[9px] text-orange-500 hover:text-orange-400 font-bold uppercase tracking-widest">&#8635; Isi Kurs Dipasang dari Kurs Aktif</button>
+
+        <div class="grid grid-cols-2 gap-3 pt-2">
+            <div>
+                <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Fee (%)</label>
+                <input type="number" id="calc-fee-percent-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white text-xs mt-1 focus:outline-none focus:border-orange-500" placeholder="mis. 10">
+            </div>
+            <div>
+                <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Fee Tetap (IDR)</label>
+                <input type="number" id="calc-fee-flat-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white text-xs mt-1 focus:outline-none focus:border-orange-500" placeholder="0">
+            </div>
+        </div>
+        <button type="button" id="calc-fill-tier-btn" class="text-[9px] text-orange-500 hover:text-orange-400 font-bold uppercase tracking-widest">&#8635; Isi Fee dari Tier Biaya Aktif</button>
+    </div>
+
+    <div class="mt-6 bg-zinc-900/60 rounded-2xl p-5 space-y-3 border border-white/5">
+        <div class="flex justify-between text-xs"><span class="text-zinc-500">Customer Bayar</span><span id="calc-out-paid" class="text-white font-bold">-</span></div>
+        <div class="flex justify-between text-xs"><span class="text-zinc-500">Customer Terima</span><span id="calc-out-received" class="text-white font-bold">-</span></div>
+        <div class="flex justify-between text-xs"><span class="text-zinc-500">Profit dari Fee</span><span id="calc-out-fee-profit" class="text-orange-400 font-bold">-</span></div>
+        <div class="flex justify-between text-xs"><span class="text-zinc-500">Profit dari Selisih Kurs</span><span id="calc-out-spread-profit" class="text-orange-400 font-bold">-</span></div>
+        <div class="border-t border-white/10 pt-3 flex justify-between text-sm"><span class="text-zinc-300 font-bold">Total Profit</span><span id="calc-out-total-profit" class="text-green-400 font-black">-</span></div>
+        <div class="flex justify-between text-[10px]"><span class="text-zinc-600 uppercase tracking-widest">Margin</span><span id="calc-out-margin" class="text-zinc-400 font-mono">-</span></div>
+    </div>
+</div>
+
                         <div class="bg-zinc-950/80 p-8 rounded-[2rem] border border-white/5 mt-6">
                              <p class="text-[10px] font-black text-zinc-500 uppercase text-center mb-6 tracking-[0.4em]">PENGUMUMAN GLOBAL (BANNER)</p>
                              <textarea id="broadcast-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-4 text-white text-xs mb-4 focus:outline-none focus:border-orange-500" rows="3" placeholder="Tulis pengumuman di sini... (Kosongkan untuk menghapus banner)"></textarea>
@@ -2110,6 +2160,100 @@
             ].forEach(acc => {
                 $(acc.t).addEventListener('click', () => { $(acc.i).classList.toggle('rotate-180'); const content = $(acc.c); content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + "px"; });
             });
+
+            // ---- KALKULATOR SIMULASI PROFIT (khusus panel admin, tidak memengaruhi transaksi live) ----
+            (() => {
+                const amountInput = $('#calc-amount-input'), amountLabel = $('#calc-amount-label');
+                const kursModalInput = $('#calc-kurs-modal-input'), kursJualInput = $('#calc-kurs-jual-input');
+                const feePercentInput = $('#calc-fee-percent-input'), feeFlatInput = $('#calc-fee-flat-input');
+                const dirI2RBtn = $('#calc-dir-i2r'), dirR2IBtn = $('#calc-dir-r2i');
+                const outPaid = $('#calc-out-paid'), outReceived = $('#calc-out-received');
+                const outFeeProfit = $('#calc-out-fee-profit'), outSpreadProfit = $('#calc-out-spread-profit');
+                const outTotalProfit = $('#calc-out-total-profit'), outMargin = $('#calc-out-margin');
+                if (!amountInput) return;
+
+                let calcDir = 'i2r';
+
+                const setActiveDirBtn = () => {
+                    const activeCls = ['bg-orange-600', 'text-white'];
+                    const inactiveCls = ['bg-zinc-900', 'text-zinc-400', 'border', 'border-white/10'];
+                    dirI2RBtn.classList.remove(...activeCls, ...inactiveCls);
+                    dirR2IBtn.classList.remove(...activeCls, ...inactiveCls);
+                    if (calcDir === 'i2r') {
+                        dirI2RBtn.classList.add(...activeCls);
+                        dirR2IBtn.classList.add(...inactiveCls);
+                        amountLabel.textContent = 'Jumlah (IDR)';
+                    } else {
+                        dirR2IBtn.classList.add(...activeCls);
+                        dirI2RBtn.classList.add(...inactiveCls);
+                        amountLabel.textContent = 'Jumlah (RUB)';
+                    }
+                };
+
+                const runCalc = () => {
+                    const amt = parseFloat(amountInput.value) || 0;
+                    const kursModal = parseFloat(kursModalInput.value) || 0;
+                    const kursJual = parseFloat(kursJualInput.value) || 0;
+                    const feePct = (parseFloat(feePercentInput.value) || 0) / 100;
+                    const feeFlat = parseFloat(feeFlatInput.value) || 0;
+
+                    if (!amt || !kursJual) {
+                        [outPaid, outReceived, outFeeProfit, outSpreadProfit, outTotalProfit, outMargin].forEach((el) => el.textContent = '-');
+                        return;
+                    }
+
+                    let paidText, receivedText, feeIdr, totalProfit, marginBaseIdr;
+
+                    if (calcDir === 'i2r') {
+                        feeIdr = Math.min(amt * feePct + feeFlat, amt);
+                        const netIdr = amt - feeIdr;
+                        const receivedRub = netIdr / kursJual;
+                        const costIdr = receivedRub * kursModal;
+                        totalProfit = amt - costIdr;
+                        marginBaseIdr = amt;
+                        paidText = formatCurrency(amt, 'IDR');
+                        receivedText = `${formatNumber(receivedRub, 2)} RUB`;
+                    } else {
+                        const grossIdr = amt * kursJual;
+                        feeIdr = Math.min(grossIdr * feePct + feeFlat, grossIdr);
+                        const receivedIdr = grossIdr - feeIdr;
+                        const revenueIdr = amt * kursModal;
+                        totalProfit = revenueIdr - receivedIdr;
+                        marginBaseIdr = revenueIdr;
+                        paidText = `${formatNumber(amt, 2)} RUB`;
+                        receivedText = formatCurrency(receivedIdr, 'IDR');
+                    }
+
+                    const spreadProfit = totalProfit - feeIdr;
+                    const margin = marginBaseIdr > 0 ? (totalProfit / marginBaseIdr) * 100 : 0;
+
+                    outPaid.textContent = paidText;
+                    outReceived.textContent = receivedText;
+                    outFeeProfit.textContent = formatCurrency(feeIdr, 'IDR');
+                    outSpreadProfit.textContent = formatCurrency(spreadProfit, 'IDR');
+                    outTotalProfit.textContent = formatCurrency(totalProfit, 'IDR');
+                    outTotalProfit.className = `font-black ${totalProfit < 0 ? 'text-red-500' : 'text-green-400'}`;
+                    outMargin.textContent = `${margin.toFixed(2)}%`;
+                };
+
+                dirI2RBtn.addEventListener('click', () => { calcDir = 'i2r'; setActiveDirBtn(); runCalc(); });
+                dirR2IBtn.addEventListener('click', () => { calcDir = 'r2i'; setActiveDirBtn(); runCalc(); });
+                [amountInput, kursModalInput, kursJualInput, feePercentInput, feeFlatInput].forEach((el) => el.addEventListener('input', runCalc));
+
+                $('#calc-fill-rate-btn').addEventListener('click', () => {
+                    kursJualInput.value = currentRate.IDR_PER_RUB || 200;
+                    runCalc();
+                });
+                $('#calc-fill-tier-btn').addEventListener('click', () => {
+                    const amt = parseFloat(amountInput.value) || 0;
+                    const kursJual = parseFloat(kursJualInput.value) || currentRate.IDR_PER_RUB || 200;
+                    const idrEquiv = calcDir === 'i2r' ? amt : amt * kursJual;
+                    feePercentInput.value = (getServiceFeeRate(idrEquiv) * 100).toFixed(2);
+                    runCalc();
+                });
+
+                setActiveDirBtn();
+            })();
 
             document.body.addEventListener('click', initAudioContext, { once: true });
             const isAdmUrl = new URLSearchParams(window.location.search).get('admin') === 'true';
