@@ -685,6 +685,54 @@
     </div>
 </div>
 
+<!-- Modal Pembelian Rubel (Riwayat & Kurs Modal Rata-rata) -->
+<div id="rub-purchase-section" class="bg-zinc-950/80 p-8 rounded-[2rem] border border-white/5 mt-6">
+    <p class="text-[10px] font-black text-zinc-500 uppercase text-center mb-2 tracking-[0.4em]">Modal Pembelian Rubel</p>
+    <p class="text-zinc-600 text-[10px] text-center mb-6 leading-relaxed px-2">Catat tiap kali beli Rubel (IDR &rarr; USDT di Tokocripto &rarr; kirim Binance &rarr; USDT &rarr; RUB di Whitebird, dll). Sistem hitung kurs modal rata-rata dari semua catatan.</p>
+
+    <div class="space-y-3 mb-6">
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">IDR Dikeluarkan</label>
+                <input type="number" id="rub-purchase-idr-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white text-xs mt-1 focus:outline-none focus:border-orange-500" placeholder="mis. 5000000">
+            </div>
+            <div>
+                <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">RUB Diterima</label>
+                <input type="number" id="rub-purchase-rub-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white text-xs mt-1 focus:outline-none focus:border-orange-500" placeholder="mis. 24500">
+            </div>
+        </div>
+        <div>
+            <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">USDT Diterima (opsional, untuk catatan saja)</label>
+            <input type="number" id="rub-purchase-usdt-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white text-xs mt-1 focus:outline-none focus:border-orange-500" placeholder="mis. 312">
+        </div>
+        <div>
+            <label class="text-[9px] font-black text-zinc-500 uppercase tracking-widest ml-1">Catatan (opsional)</label>
+            <input type="text" id="rub-purchase-note-input" class="w-full bg-zinc-900 border border-white/10 rounded-xl p-3 text-white text-xs mt-1 focus:outline-none focus:border-orange-500" placeholder="mis. Beli via Tokocripto + Whitebird 26 Jul">
+        </div>
+        <button type="button" id="rub-purchase-add-btn" class="w-full bg-orange-600/10 text-orange-400 font-black py-3 rounded-xl border border-orange-600/20 text-[10px] uppercase tracking-widest hover:bg-orange-600/20 transition-all">+ Tambah Catatan Pembelian</button>
+    </div>
+
+    <div class="bg-zinc-900/60 rounded-2xl p-5 border border-white/5 mb-6">
+        <div class="grid grid-cols-3 gap-3 text-center mb-2">
+            <div>
+                <p class="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Total Modal</p>
+                <p id="rub-purchase-total-idr" class="text-xs font-black text-white">Rp0</p>
+            </div>
+            <div>
+                <p class="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Total RUB</p>
+                <p id="rub-purchase-total-rub" class="text-xs font-black text-white">0 RUB</p>
+            </div>
+            <div>
+                <p class="text-[8px] font-black text-zinc-600 uppercase tracking-widest mb-1">Kurs Modal Rata²</p>
+                <p id="rub-purchase-avg-kurs" class="text-xs font-black text-orange-400">-</p>
+            </div>
+        </div>
+        <button type="button" id="rub-purchase-fill-calc-btn" class="w-full text-[9px] text-orange-500 hover:text-orange-400 font-bold uppercase tracking-widest mt-2">&#8635; Pakai Kurs Modal Rata-rata Ini di Kalkulator Profit</button>
+    </div>
+
+    <div id="rub-purchase-list" class="space-y-2 max-h-[280px] overflow-y-auto custom-scroll pr-1"></div>
+</div>
+
 <!-- Kalkulator Simulasi Profit -->
 <div class="bg-zinc-950/80 p-8 rounded-[2rem] border border-white/5 mt-6">
     <p class="text-[10px] font-black text-zinc-500 uppercase text-center mb-2 tracking-[0.4em]">Kalkulator Simulasi Profit</p>
@@ -2160,6 +2208,78 @@
             ].forEach(acc => {
                 $(acc.t).addEventListener('click', () => { $(acc.i).classList.toggle('rotate-180'); const content = $(acc.c); content.style.maxHeight = content.style.maxHeight ? null : content.scrollHeight + "px"; });
             });
+
+            // ---- MODAL PEMBELIAN RUBEL (riwayat & kurs modal rata-rata, khusus panel admin) ----
+            (() => {
+                const idrInput = $('#rub-purchase-idr-input'), rubInput = $('#rub-purchase-rub-input');
+                const usdtInput = $('#rub-purchase-usdt-input'), noteInput = $('#rub-purchase-note-input');
+                const addBtn = $('#rub-purchase-add-btn'), listEl = $('#rub-purchase-list');
+                const totalIdrEl = $('#rub-purchase-total-idr'), totalRubEl = $('#rub-purchase-total-rub'), avgKursEl = $('#rub-purchase-avg-kurs');
+                const fillCalcBtn = $('#rub-purchase-fill-calc-btn');
+                if (!addBtn) return;
+
+                let latestAvgKurs = 0;
+
+                addBtn.addEventListener('click', async () => {
+                    const idrSpent = parseFloat(idrInput.value) || 0;
+                    const rubReceived = parseFloat(rubInput.value) || 0;
+                    const usdtReceived = parseFloat(usdtInput.value) || 0;
+                    const note = noteInput.value.trim();
+                    if (idrSpent <= 0 || rubReceived <= 0) { alert('Isi IDR Dikeluarkan dan RUB Diterima dengan benar.'); return; }
+                    addBtn.disabled = true;
+                    try {
+                        await db.collection('rubPurchases').add({
+                            idrSpent, rubReceived, usdtReceived, note,
+                            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        });
+                        idrInput.value = ''; rubInput.value = ''; usdtInput.value = ''; noteInput.value = '';
+                    } catch (e) {
+                        alert('Gagal menyimpan catatan pembelian.');
+                    } finally {
+                        addBtn.disabled = false;
+                    }
+                });
+
+                listEl.addEventListener('click', (e) => {
+                    const delBtn = e.target.closest('.rub-purchase-delete-btn');
+                    if (!delBtn) return;
+                    if (!confirm('Hapus catatan pembelian ini?')) return;
+                    db.collection('rubPurchases').doc(delBtn.dataset.id).delete();
+                });
+
+                fillCalcBtn.addEventListener('click', () => {
+                    const kursModalInput = document.getElementById('calc-kurs-modal-input');
+                    if (!kursModalInput || !latestAvgKurs) return;
+                    kursModalInput.value = latestAvgKurs.toFixed(2);
+                    kursModalInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    kursModalInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+
+                db.collection('rubPurchases').orderBy('createdAt', 'desc').limit(200).onSnapshot((snap) => {
+                    let totalIdr = 0, totalRub = 0;
+                    const rows = [];
+                    snap.forEach((doc) => {
+                        const d = doc.data();
+                        totalIdr += d.idrSpent || 0;
+                        totalRub += d.rubReceived || 0;
+                        const kursBatch = d.rubReceived > 0 ? (d.idrSpent / d.rubReceived) : 0;
+                        const dateStr = d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
+                        rows.push(`
+                            <div class="bg-zinc-900/50 p-3 rounded-xl border border-white/5 flex justify-between items-center text-[10px]">
+                                <div>
+                                    <p class="text-white font-bold">${formatCurrency(d.idrSpent, 'IDR')} &rarr; ${formatNumber(d.rubReceived, 2)} RUB</p>
+                                    <p class="text-zinc-600">${dateStr} &middot; Kurs ${formatNumber(kursBatch, 2)}${d.usdtReceived ? ` &middot; ${formatNumber(d.usdtReceived, 2)} USDT` : ''}${d.note ? ` &middot; ${escapeHTML(d.note)}` : ''}</p>
+                                </div>
+                                <button class="rub-purchase-delete-btn text-red-500 hover:text-red-400 font-black px-2" data-id="${doc.id}">&times;</button>
+                            </div>`);
+                    });
+                    listEl.innerHTML = rows.join('') || '<p class="text-zinc-700 text-[10px] text-center py-4">Belum ada catatan pembelian.</p>';
+                    latestAvgKurs = totalRub > 0 ? (totalIdr / totalRub) : 0;
+                    totalIdrEl.textContent = formatCurrency(totalIdr, 'IDR');
+                    totalRubEl.textContent = `${formatNumber(totalRub, 2)} RUB`;
+                    avgKursEl.textContent = totalRub > 0 ? `1 RUB = ${formatNumber(latestAvgKurs, 2)}` : '-';
+                });
+            })();
 
             // ---- KALKULATOR SIMULASI PROFIT (khusus panel admin, tidak memengaruhi transaksi live) ----
             (() => {
